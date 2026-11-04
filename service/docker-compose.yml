@@ -1,0 +1,29 @@
+# AI Job Search — background service.
+#
+#   cp service/.env.example service/.env   # fill in your values
+#   docker compose -f service/docker-compose.yml up -d --build
+#   docker compose -f service/docker-compose.yml logs -f
+#
+# Build context is the repo root so the image can COPY the whole framework.
+
+services:
+  job-search:
+    build:
+      context: ..
+      dockerfile: service/Dockerfile
+    image: ai-job-search:local
+    container_name: ai-job-search
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      TZ: ${TZ:-UTC}
+    volumes:
+      # Persist generated profile data, state, CVs, tracker across restarts.
+      - ..:/workspace
+      # Cache opencode's provider auth / data between runs.
+      - opencode-data:/root/.local/share/opencode
+    # No ports: the daemon only makes outbound calls (Telegram long-poll).
+
+volumes:
+  opencode-data:

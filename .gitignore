@@ -121,3 +121,12 @@ company_research/*.json
 
 # Brainstorm mockups (superpowers visual companion) - never ship
 .superpowers/
+
+# Background service (AI Job Search daemon)
+service/.env
+service/state/
+service/node_modules/
+# Ship the config template and the lockfile (the global .env.* / bun.lock
+# rules above would otherwise swallow them).
+!service/.env.example
+!service/bun.lock

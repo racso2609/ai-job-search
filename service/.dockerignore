@@ -1,0 +1,13 @@
+# Keep the image lean; the daemon and tools only need source + scripts.
+**/node_modules
+**/.git
+**/*.log
+**/*.aux
+**/*.out
+**/*.pdf
+**/*.fls
+**/*.fdb_latexmk
+**/*.synctex.gz
+service/.env
+service/state
+documents/applications

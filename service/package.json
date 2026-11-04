@@ -1,0 +1,20 @@
+{
+  "name": "ai-job-search-daemon",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "description": "Background service: scrape+rank via opencode, notify on Telegram, approve per job",
+  "scripts": {
+    "start": "bun run src/index.js",
+    "once": "bun run src/index.js --once",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "grammy": "^1.30.0",
+    "node-cron": "^3.0.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "@types/node": "^22.0.0"
+  }
+}
