@@ -13,72 +13,97 @@ The `site:` query templates in this file are the **WebSearch fallback** — for 
 ## Search Sites
 
 Primary (your market's job boards - scaffold one with `/add-portal`):
-- **[YOUR_JOB_BOARD]** - your market's largest general job board
-- **linkedin.com/jobs** - LinkedIn job listings (filter: [YOUR_COUNTRY] / [YOUR_CITY]); also covered by `linkedin-search` CLI
-- **[YOUR_INDUSTRY_JOB_BOARD]** - a niche/industry board for your field (optional)
-- **[YOUR_ADDITIONAL_JOB_BOARD]** - another major board for your market (optional)
+## Search Sites
+
+Primary (remote-first; Oscar works from Venezuela on UTC, so "location" means timezone overlap, not commute):
+- **linkedin.com/jobs** - LinkedIn job listings; also covered by the `linkedin-search` CLI
+- **wellfound.com** (formerly AngelList) - startup roles, remote-heavy, Web3-friendly
+- **remoteok.com** / **weworkremotely.com** - remote-only boards
+- **cryptojobslist.com** / **web3.career** - niche boards for the primary domain
+- **getonbrd.com** / **remoto.dev** - LatAm-focused remote boards (Spanish-language postings)
 
 Secondary (company career pages via Google):
-- Direct Google searches with `site:` filters for known target companies
+- Direct `site:` searches against known DeFi/Web3 and fintech companies (Alchemy, Moralis, Zerion, Chainlink, Aave ecosystem, wallet vendors)
 
 ## Query Categories
 
-Queries are grouped by priority. Write **each category in every language from your Languages table** (see Language scope above). Combine each query with your location terms (e.g. your city, region, or metro area) where the site supports it.
+Queries are grouped by priority. Write **each category in both languages** from CLAUDE.md's Languages table (English and Spanish). Combine each query with a remote/geo term where the site supports it (`remote`, `anywhere`, `worldwide`, `latam`, `españa`).
 
-**Organize by function, not job title.** The same underlying work carries different titles across companies and markets (a "Data Scientist" role at one employer may be posted as "Insights Analyst" or "Data Consultant" at another). Name each priority category after the function it covers, and list several plausible job titles as query variants within that category rather than betting an entire priority tier on one exact title string.
+**Organize by function, not job title.** The same work carries different titles across companies: "Backend Engineer" may be posted as "Backend Developer", "Node.js Engineer", "Platform Engineer" or "Software Engineer (Backend)". Each category below lists several plausible titles rather than betting a whole tier on one string.
 
-### Priority 1: [YOUR_PRIMARY_ROLE_TYPE]
+### Priority 1: Blockchain / Web3 Engineering
 
-These match your strongest and most desired career direction.
-
-```
-site:[YOUR_JOB_BOARD] "[YOUR_PRIMARY_JOB_TITLE_1]" [YOUR_CITY]
-site:[YOUR_JOB_BOARD] "[YOUR_PRIMARY_JOB_TITLE_2]" [YOUR_CITY]
-site:[YOUR_JOB_BOARD] "[YOUR_KEY_SKILL]" [YOUR_CITY]
-site:linkedin.com/jobs "[YOUR_PRIMARY_JOB_TITLE_1]" [YOUR_COUNTRY]
-```
-
-### Priority 2: [YOUR_DOMAIN_EXPERTISE]
-
-These match your domain expertise.
+Oscar's strongest and most desired direction: DeFi, on-chain data, wallets, contracts.
 
 ```
-site:[YOUR_JOB_BOARD] [YOUR_DOMAIN_KEYWORD_1] [YOUR_CITY] OR [YOUR_REGION]
-site:[YOUR_JOB_BOARD] [YOUR_DOMAIN_KEYWORD_2] [YOUR_COUNTRY]
-site:linkedin.com/jobs [YOUR_DOMAIN_KEYWORD_1] [YOUR_CITY] [YOUR_COUNTRY]
+site:linkedin.com/jobs "blockchain engineer" remote
+site:linkedin.com/jobs "smart contract engineer" remote
+site:linkedin.com/jobs "DeFi engineer" remote
+site:cryptojobslist.com "blockchain" "remote"
+site:web3.career "TypeScript" "Solidity" remote
+site:linkedin.com/jobs "ingeniero blockchain" remoto
+site:linkedin.com/jobs "desarrollador blockchain" remoto
+site:getonbrd.com "blockchain" "remoto"
 ```
 
-### Priority 3: [YOUR_ADJACENT_ROLE_TYPE]
+### Priority 2: Backend Engineering (TypeScript / Node / Go)
 
-Adjacent roles you could pivot into.
-
-```
-site:[YOUR_JOB_BOARD] "[YOUR_ADJACENT_TITLE_1]" [YOUR_KEY_SKILL] [YOUR_CITY]
-site:[YOUR_JOB_BOARD] "[YOUR_ADJACENT_TITLE_2]" [YOUR_KEY_SKILL] [YOUR_CITY]
-```
-
-### Priority 4: Broader Technical / Consulting
-
-Wider net for general technical roles.
+Core technical strength: hexagonal architecture, microservices, Kafka, PostgreSQL, real-time.
 
 ```
-site:[YOUR_JOB_BOARD] [YOUR_KEY_SKILL] developer [YOUR_CITY]
-site:linkedin.com/jobs "[YOUR_KEY_SKILL] developer" [YOUR_CITY]
-site:[YOUR_JOB_BOARD] "technical consultant" [YOUR_DOMAIN] [YOUR_CITY]
+site:linkedin.com/jobs "backend engineer" "TypeScript" remote
+site:linkedin.com/jobs "backend engineer" "Node.js" remote
+site:linkedin.com/jobs "backend engineer" "Go" remote
+site:linkedin.com/jobs "platform engineer" "TypeScript" remote
+site:wellfound.com "backend engineer" "Node.js" remote
+site:linkedin.com/jobs "desarrollador backend" "Node.js" remoto
+site:getonbrd.com "backend" "Node" remoto
+```
+
+### Priority 3: Full-Stack (React / Next.js + Node)
+
+Adjacent role: end-to-end product work, which matches the co-founder profile.
+
+```
+site:linkedin.com/jobs "full stack engineer" "React" "Node" remote
+site:linkedin.com/jobs "full stack engineer" "Next.js" remote
+site:linkedin.com/jobs "desarrollador full stack" "React" remoto
+site:getonbrd.com "full stack" "remoto"
+```
+
+### Priority 4: Fintech / Payments / Data
+
+Broader net where the domain intersects crypto rails.
+
+```
+site:linkedin.com/jobs "fintech" "backend engineer" remote
+site:linkedin.com/jobs "payments engineer" remote
+site:linkedin.com/jobs "data engineer" "Kafka" remote
+site:linkedin.com/jobs "technical lead" "fintech" remote
+```
+
+### Priority 5: Technical Lead / Senior IC at a software factory
+
+Matches the Dlocs experience: client-facing senior delivery.
+
+```
+site:linkedin.com/jobs "technical lead" "Node.js" remote
+site:linkedin.com/jobs "senior engineer" "client-facing" remote
+site:linkedin.com/jobs "lider tecnico" "remoto"
 ```
 
 ## Location Filter
 
-When evaluating results, verify the job location is within reasonable commute distance from your home. Define acceptable areas:
-- [YOUR_CITY] and surrounding areas
-- [ACCEPTABLE_AREA_1]
-- [ACCEPTABLE_AREA_2]
-- [BORDERLINE_AREA] (borderline - ~X min by transit)
-- [TOO_FAR_AREA] (too far)
+Oscar works **remotely only** and will not relocate. There is no commute radius to evaluate; filter on remote-eligibility and timezone instead:
+
+- **Accepted:** fully remote, "remote anywhere", "remote worldwide", "remote LATAM", "remote EU/US with async culture"
+- **Accepted:** hybrid roles only if the office requirement is nominal or the company is remote-first in practice
+- **Borderline (flag, don't drop):** "remote US only" / "remote EU only" where the posting is strict about work authorization — Oscar has no US/EU work permit, so verify before applying
+- **Rejected:** on-site only, relocation required, or a fixed timezone band that does not overlap UTC (e.g. US Pacific-only synchronous)
 
 ## Language Filter
 
-Your working languages and levels are in CLAUDE.md's Languages table. When filtering scraped results, apply `04-job-evaluation.md`'s Language Gate: a posting requiring a language you haven't declared at all is excluded; a posting requiring a higher level than you declared in a language you do work in is not excluded, flag it clearly instead (see `job-scraper/SKILL.md`'s Step 3 "Quick Fit Assessment" for how the flag surfaces in `/scrape` output). Postings simply *written* in a language you don't work in, that don't require it on the job, are fine.
+Your working languages and levels are in CLAUDE.md's Languages table (Spanish native, English professional). When filtering scraped results, apply `04-job-evaluation.md`'s Language Gate: a posting requiring a language you haven't declared at all is excluded; a posting requiring a higher level than you declared in a language you do work in is not excluded, flag it clearly instead (see `job-scraper/SKILL.md`'s Step 3 "Quick Fit Assessment" for how the flag surfaces in `/scrape` output). Postings simply *written* in a language you don't work in, that don't require it on the job, are fine.
 
 ## Date Filter
 

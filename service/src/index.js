@@ -16,7 +16,14 @@ const once = process.argv.includes("--once")
 const queue = new Queue()
 
 function enqueueCycle(name, fn) {
-  queue.push(name, fn).catch(() => {})
+  // Queue.push() returns the job id (not a promise); job failures are caught,
+  // logged and emitted as "failed" by Queue.#drain(). Guard the synchronous
+  // path too: a throw here would escape the cron callback and main()'s catch.
+  try {
+    queue.push(name, fn)
+  } catch (err) {
+    log.error(`enqueue ${name} failed:`, err?.stack ?? err)
+  }
 }
 
 async function main() {

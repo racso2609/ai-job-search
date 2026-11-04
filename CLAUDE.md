@@ -1,10 +1,7 @@
-# Job Application Assistant for [YOUR_NAME]
-
-<!-- SETUP: This file is populated by running /setup -->
-<!-- After running /setup, all [PLACEHOLDER] tokens will be replaced with your actual information -->
+# Job Application Assistant for Oscar Lugo
 
 ## Role
-This repo is a job application workspace. Claude acts as a career advisor and application assistant for [YOUR_NAME], helping with:
+This repo is a job application workspace. The agent acts as a career advisor and application assistant for Oscar Lugo, helping with:
 1. **Job fit evaluation** - Assess job postings against your profile (skills, experience, behavioral traits)
 2. **CV tailoring** - Adapt existing CV templates (LaTeX/moderncv) to target specific roles
 3. **Cover letter writing** - Draft targeted cover letters using existing templates (LaTeX)
@@ -13,85 +10,110 @@ This repo is a job application workspace. Claude acts as a career advisor and ap
 
 ## Candidate Profile
 
-<!-- This section is auto-populated by /setup. You can also fill it in manually. -->
-
 ### Identity
-- **Name:** [YOUR_NAME]
-- **Location:** [YOUR_CITY], [YOUR_COUNTRY] ([YOUR_COMMUTE_CONSTRAINTS])
+- **Name:** Oscar Lugo
+- **Location:** Remote (UTC) — based in Venezuela, works remotely worldwide (no relocation)
 - **Languages:**
   | Language | Level |
   |----------|-------|
-  | [LANGUAGE] | [LEVEL] |
-  <!-- Every language you work in professionally, with your level (CEFR, "native," "professional
-  working proficiency," whatever your CV/LinkedIn use - no need to force it into one scale). An
-  undeclared language is a hard deal-breaker if a posting requires it; a declared language at a
-  lower level than a posting wants is flagged for your own judgment, not auto-rejected. See
-  04-job-evaluation.md's Language Gate. -->
-- **CV language:** [YOUR_CV_LANGUAGE] <!-- English unless your market expects otherwise; /setup asks -->
-
-- **Status:** [YOUR_EMPLOYMENT_STATUS]
-- **LinkedIn headline:** "[YOUR_LINKEDIN_HEADLINE]"
+  | Spanish | Native |
+  | English | Professional working proficiency |
+- **CV language:** English (default). Spanish variants exist for LatAm/Spain postings.
+- **Status:** Employed — Co-Founder & Technical Lead at Dlocs, plus senior contractor on two Dlocs clients (Aurantis, Hyxora). Open to senior/lead roles.
+- **LinkedIn headline:** "Full-Stack & Blockchain Engineer · TypeScript / Node / Go"
 
 ### Education
-<!-- List your degrees, most recent first -->
-- **[DEGREE_LEVEL] in [FIELD]** ([YEAR_START]-[YEAR_END]) - [INSTITUTION]
-  - Thesis: "[THESIS_TITLE]"
-  - Topics: [KEY_TOPICS]
+- **B.Sc. in Computer Science** (2019, 4 of 8 semesters completed) - Universidad Central de Venezuela (UCV)
+  - Topics: computer science fundamentals
 
 ### Professional Experience
-<!-- List your roles, most recent first -->
-- **[JOB_TITLE]** ([START_DATE] - [END_DATE]) - **[COMPANY]** ([LOCATION])
-  - [KEY_RESPONSIBILITY_1]
-  - [KEY_RESPONSIBILITY_2]
-  - [KEY_ACHIEVEMENT]
+- **Senior Backend Engineer (Node.js / NestJS)** (2026-09 - present) - **Aurantis** (client of Dlocs) (Remote)
+  - Hexagonal blockchain-ingestion backend: neutral port plus per-provider adapters, so swapping providers is configuration, not code.
+  - Decorator chain over the port (rate-limit → failover → Redis cache) and real failover for streaming with mid-stream switching.
+  - WebSocket streaming (log and ERC-20 subscriptions, backpressure, bounded reconnection) plus a REST API in OpenAPI 3.1.
+- **Senior Frontend / Mobile Engineer** (2026-02 - present) - **Hyxora** (client of Dlocs) (Remote)
+  - Architected the mobile client from zero with React Native, Expo and strict TypeScript; decoupled 12 modules, removed 30% of side-effect bugs.
+  - 60 FPS UI with live tickers and charts; cut frame drops 40%.
+  - Sole founding engineer: zero to App Store / Play Store launch in 8 months.
+- **Co-Founder & Technical Lead** (2023-12 - present) - **Dlocs** (Remote)
+  - Software factory: 15 enterprise projects across 20 clients (DeFi, fintech, data).
+  - Reusable architecture baseline plus deployment scaffolding: 40% faster client onboarding.
+  - Data pipelines and legacy-to-CRM migrations with zero downtime across 10 migrations.
+- **Senior Back End Developer** (2025-02 - 2026-02) - **Moneva** (Part-time)
+  - Real-time activity pipeline at 5,000 events/sec across 3 chains with Kafka.
+  - DID-based auth for wallet onboarding: 25,000+ users, 99.5% login success.
+  - 6 microservices end-to-end with 99.9% uptime; −35% latency.
+- **Blockchain Developer** (2024-12 - 2025-06) - **Parifi** (Remote)
+  - Nonce-tracking transaction manager: 500,000+ on-chain transactions, 99.9% inclusion, no stuck nonces.
+  - 12 audit-cleared contracts; 25% lower gas.
+- **Blockchain Developer** (2023-03 - 2024-02) - **NexeraID** (Remote)
+  - Self-sovereign identity platform; soulbound NFTs and privacy-preserving compliance.
+- **FullStack-Blockchain Developer** (2022-07 - 2024-02) - **AllianceBlock** (Full-time)
+  - Bridged institutional finance with Web3 liquidity applications; 8 institutional APIs, 15 features across 5 releases.
+- **Senior Team Lead** (2022-12 - 2023-11) - **Leaderdao.AI** (Remote · Part-time)
+  - DAO governance protocol; led 6 engineers through 12 releases; mentored on Solidity.
+- **Blockchain Developer** (2022-05 - 2022-08) - **CUB3** (Full-time)
+  - React experiences with real-time Firebase backends.
+- **Javascript FullStack Developer** (2021-05 - 2022-07) - **EYSS** (Full-time)
+  - Scalable API routes and server logic on the Node.js ecosystem.
+- **Wordpress Developer** (2021-08 - 2021-08) - **DiplomadosOnline.com** (Part-time)
+  - Backend plugins and workflow automation saving 30 hrs/month.
 
 ### Technical Skills
-- **Primary:** [YOUR_PRIMARY_SKILLS]
-- **Secondary:** [YOUR_SECONDARY_SKILLS]
-- **Domain:** [YOUR_DOMAIN_EXPERTISE]
-- **Software:** [YOUR_TOOLS_AND_SOFTWARE]
+- **Primary:** TypeScript, JavaScript, Node.js, React, React Native (Expo), Next.js
+- **Secondary:** Go, Solidity, Python, SQL, Shell, Rust (basic)
+- **Domain:** EVM, Solana (SPL), DeFi, smart contracts, wallets/key management, DID/self-sovereign identity, cross-chain; hexagonal architecture, microservices, Kafka, WebSocket, PostgreSQL, MongoDB, Redis
+- **Software:** Docker, GitHub Actions, Linux, systemd, MCP, Vitest/Jest, Zod, OpenAPI, Alchemy, Moralis, Zerion
 
 ### Certifications
-<!-- List relevant certifications with dates -->
-- **[CERTIFICATION_NAME]** - [HOURS]h - completed [DATE]
+None recorded. If any exist, add them here and to `01-candidate-profile.md`.
 
 ### Publications
-<!-- List peer-reviewed publications, if any -->
-- [AUTHOR_LIST] ([YEAR]). [TITLE]. [JOURNAL].
+None.
 
 ### Awards
-<!-- List relevant awards, hackathons, competitions -->
-- [AWARD_NAME] - [EVENT] ([YEAR])
+None recorded.
 
 ### Behavioral Profile
-<!-- Your behavioral assessment results (PI, DISC, Myers-Briggs, or self-assessment) -->
-- **[TRAIT_1]** - [DESCRIPTION]
-- **[TRAIT_2]** - [DESCRIPTION]
-- **Strengths:** [YOUR_STRENGTHS]
-- **Growth areas:** [YOUR_GROWTH_AREAS]
-- **Thrives in:** [YOUR_IDEAL_ENVIRONMENT]
+<!-- Derived from self-reported working style in the source documents; no formal
+     assessment (PI/DISC/MBTI) has been taken. Treat as inference, not measurement. -->
+- **Autonomy** - Ships end to end without waiting on another team; took a mobile app from zero to store launch as sole engineer.
+- **Architecture-first** - Reaches for neutral ports and adapters so provider and vendor choices stay reversible.
+- **Verification discipline** - Insists on real evidence (tests, CI, measured output) over "should work"; automated quality gates on every project.
+- **Strengths:** end-to-end delivery, system design under vendor uncertainty, technical documentation (SDD), client-facing communication.
+- **Growth areas:** prefers depth over breadth-of-process; formal credentials incomplete (degree unfinished).
+- **Thrives in:** small senior teams with real ownership, remote-first, product close to the on-chain/fintech domain.
 
 ### What Excites You
-<!-- What motivates you professionally -->
-- [PASSION_1]
-- [PASSION_2]
+- Blockchain/Web3 infrastructure: DeFi protocols, wallets, on-chain data pipelines, cross-chain.
+- Building architecture that lets a product change providers and chains without a rewrite.
+- Taking a feature from idea to production alone, with real users and measured outcomes.
 
 ### Target Sectors
-<!-- Industries and companies you're targeting -->
-- [SECTOR_1]: [EXAMPLE_COMPANIES]
-- [SECTOR_2]: [EXAMPLE_COMPANIES]
+- **DeFi / on-chain infrastructure:** protocols, wallets, data/indexing providers.
+- **Fintech:** payments, custody, cross-border rails.
+- **Software factories / product studios:** senior IC or technical-lead roles with client exposure.
 
 ### Deal-breakers
-<!-- Hard constraints on job search. Language requirements are handled separately and
-automatically from your Languages table above - don't duplicate them here. -->
-- [DEALBREAKER_1]
-- [DEALBREAKER_2]
+- On-site only or relocation required.
+- Unpaid or commission-only compensation.
+- Below USD 30,000/year (USD 2,500/month); target USD 36,000/year (USD 3,000/month).
 
 ## Repo Structure
 - `cv/` - LaTeX CV variants (moderncv template, banking style)
 - `cover_letters/` - LaTeX cover letters (custom cover.cls template)
+- `documents/` - Source CVs (`cv/`), LinkedIn exports, diplomas, references, projects
 - `.claude/skills/` - AI skill definitions for the application workflow
 - `.agents/skills/` - Job search CLI tools
+
+## Workflow for New Job Applications
+1. User provides a job posting (URL or text)
+2. **Always evaluate fit first**: skills match, experience match, behavioral/culture match. Present this assessment to the user before proceeding.
+3. If good fit: create targeted CV (`cv/main_<company>_<role>.tex`) and cover letter (`cover_letters/cover_<company>_<role>.tex`)
+4. **Verify both documents** (see Verification Checklist below)
+5. Prepare interview talking points based on the role requirements and your strengths
+
+**Important:** When mentioning agentic coding or AI tooling in CVs/cover letters, explicitly reference **Claude Code** by name.
 
 ## Workflow for New Job Applications
 1. User provides a job posting (URL or text)
