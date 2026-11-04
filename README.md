@@ -37,6 +37,18 @@
 >
 > This project has **no affiliated cryptocurrency, token, or paid sponsorship program**. Anything claiming otherwise is unauthorized and should be treated as a scam. The only ways to support the project are the Ko-fi link below and contributing on GitHub.
 
+> [!IMPORTANT]
+> **This fork adds two things on top of upstream:** (1) an **opencode** port so the
+> workflow runs without Claude Code, and (2) a **background service** that scrapes
+> and ranks on a schedule, pings you on Telegram to approve/skip each job, drafts
+> the application and sends you the PDFs, watches Gmail for recruiter replies, and
+> offers Google Calendar events for interviews.
+>
+> - Port: [`opencode.json`](opencode.json) + [`.opencode/`](.opencode/) — the
+>   `.claude/` tree is untouched, so both runtimes work.
+> - Service: [`service/`](service/) — install with `./service/install.sh`.
+>   Full guide: [`service/INSTALL.md`](service/INSTALL.md).
+
 ## Does it actually work?
 
 I'm a geophysicist by training. When my position was cut in late 2025, I built this framework to run my own job search - the same `/scrape`, `/apply`, and `/interview` workflow in this repo, used weekly, on my own career. I was upfront about it with every employer I spoke to, and instead of counting against me, it usually sparked a genuine technical conversation.
@@ -352,6 +364,39 @@ The framework supports two distinct modes of job searching:
 - **Latent opportunity discovery:** By analyzing your full history (not just job titles, but the actual work you did), the system can surface career paths you haven't considered. Transferable skills that map to unexpected industries, patterns in what you enjoyed or excelled at, or emerging roles that combine your domain expertise with new technology.
 
 To get the most from this, invest time during `/setup` in describing not just your experience, but what energized you, what drained you, and what you'd want more of. This context directly shapes how the system evaluates fit and which roles it surfaces during `/scrape`.
+
+## Running without Claude Code (opencode port)
+
+The workflow is driven by skills, agents and commands that opencode loads natively:
+
+- [`opencode.json`](opencode.json) — permissions (translated from
+  `.claude/settings.json`) and the optional Gmail/Calendar MCP servers.
+- [`.opencode/agents/`](.opencode/agents/) — the three reviewers as opencode
+  subagents: `posting-fetcher`, `posting-scorer`, `application-reviewer`.
+- [`.opencode/commands/`](.opencode/commands/) — all repo commands plus
+  `scrape`/`upskill` wrappers and the `daemon-*` headless variants.
+- [`.opencode/plugins/scratchpad.js`](.opencode/plugins/scratchpad.js) — sets the
+  `SCRATCHPAD` env var the fetch workflow expects.
+
+The `.claude/` tree is left untouched, so Claude Code and opencode both work off
+the same source of truth.
+
+## Background service
+
+Run the job search unattended and decide by Telegram tap. See
+[`service/README.md`](service/README.md) and [`service/INSTALL.md`](service/INSTALL.md).
+
+```bash
+./service/install.sh              # install + cold-start self-check
+./service/install.sh --docker     # or deploy in Docker
+cd service && bun run start       # run the daemon
+```
+
+What it does per cycle: scrape + rank → Telegram summary with
+[Apply]/[Skip]; on Apply, draft a tailored CV + cover letter, compile the PDFs
+and send them to you; a Gmail watch proposes recruiter-reply status updates;
+interview invites offer a Google Calendar event. It never submits an
+application for you.
 
 ## File structure
 

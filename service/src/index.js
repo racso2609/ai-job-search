@@ -1,19 +1,40 @@
 import cron from "node-cron"
 import { config, ensureDirs } from "./config.js"
 import { log } from "./logger.js"
-import { startBot } from "./telegram.js"
-import { runCycle } from "./pipeline.js"
+import { startBot, setHandlers } from "./telegram.js"
+import { Queue } from "./queue.js"
+import {
+  runScrapeCycle,
+  runGmailCycle,
+  handleApplyTap,
+  handleCalendarTap,
+} from "./pipeline.js"
 
 const once = process.argv.includes("--once")
+
+// One shared queue: only one opencode run happens at a time.
+const queue = new Queue()
+
+function enqueueCycle(name, fn) {
+  queue.push(name, fn).catch(() => {})
+}
 
 async function main() {
   ensureDirs()
 
   if (once) {
-    log.info("--once: running a single cycle without the Telegram bot")
-    await runCycle()
+    log.info("--once: running the scrape cycle without the bot")
+    await runScrapeCycle()
     process.exit(0)
   }
+
+  // Route Telegram taps into the queue so they never run in parallel with a
+  // scheduled cycle.
+  setHandlers({
+    onApply: (jobKey, meta) => enqueueCycle(`apply ${jobKey}`, () => handleApplyTap(jobKey, meta)),
+    onCalendarApprove: (prop) => enqueueCycle(`calendar ${prop.company}`, () => handleCalendarTap(prop)),
+    onGmailApprove: null, // Gmail approval writes are done by the user via /outcome, not here
+  })
 
   startBot()
 
@@ -21,29 +42,36 @@ async function main() {
     log.error(`invalid SCRAPE_CRON "${config.scrapeCron}"`)
     process.exit(1)
   }
-
   cron.schedule(
     config.scrapeCron,
-    () => {
-      runCycle().catch((e) => log.error("cycle failed:", e?.stack ?? e))
-    },
+    () => enqueueCycle("scrape-cycle", runScrapeCycle),
     { timezone: config.timezone },
   )
+  log.info(`scrape scheduler: "${config.scrapeCron}" (${config.timezone})`)
 
-  log.info(`scheduler active: "${config.scrapeCron}" (${config.timezone})`)
-
-  if (config.runOnStart) {
-    runCycle().catch((e) => log.error("initial cycle failed:", e?.stack ?? e))
+  if (config.enableGmail) {
+    if (!cron.validate(config.gmailCron)) {
+      log.error(`invalid GMAIL_CRON "${config.gmailCron}" - gmail watch disabled`)
+    } else {
+      cron.schedule(
+        config.gmailCron,
+        () => enqueueCycle("gmail-cycle", runGmailCycle),
+        { timezone: config.timezone },
+      )
+      log.info(`gmail scheduler: "${config.gmailCron}" (${config.timezone})`)
+    }
   }
 
-  process.on("SIGTERM", () => {
-    log.info("SIGTERM received, exiting")
+  if (config.runOnStart) {
+    enqueueCycle("initial-scrape", runScrapeCycle)
+  }
+
+  const shutdown = () => {
+    log.info("shutting down")
     process.exit(0)
-  })
-  process.on("SIGINT", () => {
-    log.info("SIGINT received, exiting")
-    process.exit(0)
-  })
+  }
+  process.on("SIGTERM", shutdown)
+  process.on("SIGINT", shutdown)
 }
 
 main().catch((e) => {

@@ -1,6 +1,35 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "instructions": ["AGENTS.md"],
+  "instructions": [
+    "AGENTS.md"
+  ],
+  "mcp": {
+    "gmail": {
+      "type": "local",
+      "command": [
+        "bun",
+        "x",
+        "@gongrzhe/server-gmail-autoauth-mcp"
+      ],
+      "enabled": false,
+      "environment": {
+        "GMAIL_OAUTH_PATH": "{env:GMAIL_OAUTH_PATH}",
+        "GMAIL_CREDENTIALS_PATH": "{env:GMAIL_CREDENTIALS_PATH}"
+      }
+    },
+    "calendar": {
+      "type": "local",
+      "command": [
+        "bun",
+        "x",
+        "@cocal/google-calendar-mcp"
+      ],
+      "enabled": false,
+      "environment": {
+        "GOOGLE_OAUTH_CREDENTIALS": "{env:GOOGLE_OAUTH_CREDENTIALS}"
+      }
+    }
+  },
   "permission": {
     "edit": "allow",
     "webfetch": "allow",
@@ -37,7 +66,8 @@
       "lualatex*": "allow",
       "xelatex*": "allow",
       "pdftotext*": "allow",
-      "curl -d*": "deny",      "curl --data*": "deny",
+      "curl -d*": "deny",
+      "curl --data*": "deny",
       "curl -F*": "deny",
       "curl --form*": "deny",
       "curl -T*": "deny",

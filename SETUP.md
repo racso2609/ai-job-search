@@ -2,6 +2,11 @@
 
 Step-by-step instructions for getting the AI Job Search framework running.
 
+> **Using opencode or the background service instead of Claude Code?** See
+> [`service/INSTALL.md`](service/INSTALL.md) for the opencode port, the
+> unattended Telegram service, Google OAuth (Gmail/Calendar) and the
+> cold-start self-check.
+
 ## 1. Prerequisites
 
 ### Claude Code

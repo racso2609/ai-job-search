@@ -130,3 +130,4 @@ service/node_modules/
 # rules above would otherwise swallow them).
 !service/.env.example
 !service/bun.lock
+service/secrets/

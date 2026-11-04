@@ -8,7 +8,7 @@ dispatch subagents (/apply, /rank).
 import pathlib
 import re
 
-REPO = pathlib.Path(__file__).resolve().parent.parent
+REPO = pathlib.Path(__file__).resolve().parents[2]
 SRC = REPO / ".claude" / "commands"
 DST = REPO / ".opencode" / "commands"
 DST.mkdir(parents=True, exist_ok=True)

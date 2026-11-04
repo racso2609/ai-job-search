@@ -85,3 +85,66 @@ export function readDecisions() {
     })
     .filter(Boolean)
 }
+
+// --- pending approvals: proposals awaiting a Telegram tap ----------------------
+//
+// Maps an opaque id (sent as the button callback data) to the proposal payload,
+// so a callback can be resolved back to the exact proposal. Persisted so taps
+// that arrive after a restart still resolve.
+
+function loadPending() {
+  const p = config.paths.pending
+  if (!existsSync(p)) return {}
+  try {
+    const s = JSON.parse(readFileSync(p, "utf8"))
+    return s && typeof s === "object" ? s : {}
+  } catch {
+    return {}
+  }
+}
+
+function savePending(map) {
+  writeFileSync(config.paths.pending, JSON.stringify(map, null, 2))
+}
+
+export function addPending(id, payload) {
+  const map = loadPending()
+  map[id] = { ...payload, created: new Date().toISOString() }
+  savePending(map)
+  return id
+}
+
+export function getPending(id) {
+  return loadPending()[id] ?? null
+}
+
+export function removePending(id) {
+  const map = loadPending()
+  delete map[id]
+  savePending(map)
+}
+
+// Gmail message ids already classified, so a scan never re-proposes the same
+// email. Mirrors gmail_sync/state.json but owned by the daemon.
+export function gmailSeen() {
+  const p = config.paths.gmailSeen
+  if (!existsSync(p)) return { processed: [] }
+  try {
+    const s = JSON.parse(readFileSync(p, "utf8"))
+    if (!Array.isArray(s.processed)) s.processed = []
+    return s
+  } catch {
+    return { processed: [] }
+  }
+}
+
+export function markGmailSeen(ids) {
+  const s = gmailSeen()
+  const set = new Set(s.processed)
+  for (const id of ids) set.add(id)
+  writeFileSync(
+    config.paths.gmailSeen,
+    JSON.stringify({ processed: [...set] }, null, 2),
+  )
+}
+
