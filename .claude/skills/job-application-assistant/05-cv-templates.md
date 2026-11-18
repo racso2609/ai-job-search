@@ -252,6 +252,31 @@ Claiming a credential not yet held is a factual misstatement, and it is the kind
 - Use 4-6 bullets for most recent role, 3-4 for previous, 2-3 for older
 - **Emphasize measurable results** where possible: "Reduced processing time by X%", "Model adopted by the team"
 
+#### Client projects and overlapping engagements nest under their employer
+
+An engagement that ran **concurrently with, or inside, another employment** must not appear as a sibling `\cventry`. Two parallel entries with overlapping dates read as job-hopping to a human, and an ATS that fills a title field per date range records two simultaneous full-time roles. Nest it as a sub-entry inside the employer that contained it:
+
+```latex
+\item{\cventry{2022-07 - 2024-02}{FullStack-Blockchain Developer}{AllianceBlock}{Full-time}{}{\vspace{1pt}
+\begin{itemize}
+    \item {<employer-level bullet>}
+    \item {\textbf{NexeraID} --- \emph{Blockchain Developer}, 2023-03 - 2024-02
+\begin{itemize}
+            \item {<project bullet>}
+        \end{itemize}}
+    \end{itemize}}}
+```
+
+Rules that make this survive both readers:
+
+- **The sub-entry carries its own date range**, so the overlap is stated rather than hidden. The employer's range stays the outer one.
+- **`\textbf{Name} --- \emph{Title}, dates` on one line.** The title comes before any employer-ish string, same as the `\cventry` override above: a parser reading the line gets the role first.
+- **Only nest when the dates genuinely overlap.** A separate employer with a non-overlapping range stays a top-level `\cventry` — nesting it would claim a relationship that does not exist.
+- **Do not add `\vspace` between the sub-entries** (see the itemize spacing note above); the nested `itemize` already separates them.
+- **The employer must still exist as a top-level entry.** If the CV never mentioned the containing employer (e.g. the project was the only thing listed), add the employer entry first — otherwise the sub-entry has no parent and reads as an orphan.
+
+This is a content rule, not a formatting one: it changes what the CV asserts about who employed whom, so it applies to every tailored CV, not just the ones where the layout was tight.
+
 #### Check tenure against visible output
 
 Before finalizing, look at each role the way a stranger will: **date span versus how much work is shown.** A two-year role represented by a single project reads as low output, whether or not that is fair. The reader cannot know what filled the time, so they guess, and the guess is unflattering.
