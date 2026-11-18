@@ -213,3 +213,74 @@ describe("--exclude-source", () => {
     expect(table).not.toContain("Role a")
   })
 })
+
+describe("--page with an exclusion", () => {
+  // The exclusion drops rows after the API has ranked and paged them, so a page
+  // of the filtered stream does not line up with any page of the unfiltered one.
+  // Walking from the caller's page number re-reads the tail of the previous page
+  // (rows already seen) or skips rows not yet seen; the walk therefore always
+  // starts at offset 0 and the caller's page is a slice of the accumulated result.
+  const interleaved = [
+    job("whatjobs-ca", "w1"),
+    job("greenhouse", "a"),
+    job("whatjobs-pl", "w2"),
+    job("greenhouse", "b"),
+    job("greenhouse", "c"),
+    job("greenhouse", "d"),
+    job("greenhouse", "e"),
+    job("greenhouse", "f"),
+  ]
+
+  test("page 2 does not repeat a row that page 1 already returned", async () => {
+    stubPages([interleaved.slice(0, 2), interleaved.slice(2, 4), interleaved.slice(4, 6), interleaved.slice(6, 8)])
+    const first = capture("stdout")
+    await runSearch(opts({ query: "backend", limit: 2, page: 1, excludeSources: ["whatjobs"] }))
+    const page1 = JSON.parse(first.read()).results.map((r: { id: string }) => r.id)
+
+    const second = capture("stdout")
+    await runSearch(opts({ query: "backend", limit: 2, page: 2, excludeSources: ["whatjobs"] }))
+    const page2 = JSON.parse(second.read()).results.map((r: { id: string }) => r.id)
+
+    expect(page1).toEqual(["a", "b"])
+    expect(page2).toEqual(["c", "d"])
+    expect(page2.filter((id: string) => page1.includes(id))).toEqual([])
+  })
+
+  test("page 1 keeps the fast path and still starts at offset 0", async () => {
+    const stub = stubPages([interleaved.slice(0, 2), interleaved.slice(2, 4)])
+    const stdout = capture("stdout")
+    await runSearch(opts({ query: "backend", limit: 2, page: 1, excludeSources: ["whatjobs"] }))
+    expect(JSON.parse(stdout.read()).results.map((r: { id: string }) => r.id)).toEqual(["a", "b"])
+    expect(new URL(stub.urls[0]).searchParams.get("offset")).toBe("0")
+  })
+
+  test("a page past the end of the filtered stream is empty, not a repeat", async () => {
+    stubPages([interleaved.slice(0, 2), interleaved.slice(2, 4), interleaved.slice(4, 6), interleaved.slice(6, 8)])
+    const stdout = capture("stdout")
+    await runSearch(opts({ query: "backend", limit: 3, page: 3, excludeSources: ["whatjobs"] }))
+    // Six non-excluded rows exist, so page 3 of size 3 is past the end.
+    expect(JSON.parse(stdout.read()).results).toEqual([])
+  })
+
+  test("a row repeated across pages does not eat a slot", async () => {
+    // Each page is a separate query against a live ranking, so the same posting
+    // can legitimately come back twice; without the guard the duplicate would
+    // occupy one of the caller's slots and silently shorten the page.
+    stubPages([
+      [job("whatjobs-ca", "w1"), job("greenhouse", "a")],
+      [job("greenhouse", "a"), job("greenhouse", "b")],
+      [job("greenhouse", "c"), job("greenhouse", "d")],
+    ])
+    const stdout = capture("stdout")
+    await runSearch(opts({ query: "backend", limit: 2, page: 1, excludeSources: ["whatjobs"] }))
+    expect(JSON.parse(stdout.read()).results.map((r: { id: string }) => r.id)).toEqual(["a", "b"])
+  })
+
+  test("without an exclusion, --page reaches the request instead of being pinned to 1", async () => {
+    const stub = stubPages([interleaved.slice(0, 3), interleaved.slice(3, 6)])
+    const stdout = capture("stdout")
+    await runSearch(opts({ query: "backend", limit: 3, page: 2 }))
+    expect(JSON.parse(stdout.read()).results.map((r: { id: string }) => r.id)).toEqual(["b", "c", "d"])
+    expect(new URL(stub.urls[0]).searchParams.get("offset")).toBe("3")
+  })
+})

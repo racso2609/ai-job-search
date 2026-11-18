@@ -46,11 +46,11 @@ export interface SearchOpts {
   facets: Record<string, string[]>
 }
 
-function buildQuery(opts: SearchOpts, page = opts.page): URLSearchParams {
+function buildQuery(opts: SearchOpts, page = opts.page, offsetOverride?: number): URLSearchParams {
   const p = new URLSearchParams()
   if (opts.query) p.set("q", opts.query)
   p.set("limit", String(opts.limit))
-  p.set("offset", String((page - 1) * opts.limit))
+  p.set("offset", String(offsetOverride ?? (page - 1) * opts.limit))
   if (opts.includeDescription !== false) p.set("description_format", opts.descriptionFormat)
   if (opts.jobage > 0 && opts.jobage < 9999) p.set("posted_within_days", String(opts.jobage))
   if (opts.workMode) p.set("work_mode", opts.workMode)
@@ -195,8 +195,13 @@ export function isExcludedSource(source: string | null | undefined, excluded: st
 }
 
 /** One page of results from the search endpoint, or null when the endpoint is missing. */
-function fetchPage(path: string, opts: SearchOpts, page: number): Promise<Envelope<FreehireJob[]> | null> {
-  return apiGet<FreehireJob[]>(`${path}?${buildQuery(opts, page).toString()}`)
+function fetchPage(
+  path: string,
+  opts: SearchOpts,
+  page: number,
+  offsetOverride?: number,
+): Promise<Envelope<FreehireJob[]> | null> {
+  return apiGet<FreehireJob[]>(`${path}?${buildQuery(opts, page, offsetOverride).toString()}`)
 }
 
 // How many pages a filtered search will read before giving up on filling the
@@ -224,30 +229,45 @@ async function fetchFiltered(
   excluded: string[],
 ): Promise<Envelope<FreehireJob[]> | null> {
   const kept: FreehireJob[] = []
+  const seen = new Set<string>()
   let meta: Envelope<FreehireJob[]>["meta"]
+  // Filtering happens after the API has already ranked and paged the corpus, so
+  // a page of the *filtered* stream does not line up with any page of the
+  // unfiltered one: with `whatjobs` interleaved, the rows page 1 consumed are not
+  // the rows page 2 starts at, and asking for "page 2" re-reads the tail of page
+  // 1 (returning rows the caller already saw) or skips past rows it has not.
+  // The only sequence that stays contiguous is the unfiltered ranking walked
+  // from offset 0, so the walk always starts there and the caller's page is a
+  // slice of the accumulated result.
+  const skip = (opts.page - 1) * opts.limit
+  const target = opts.page * opts.limit
+  let offset = 0
   for (let i = 0; i < MAX_FILTER_PAGES; i++) {
-    const page = opts.page + i
-    const env = await fetchPage(path, opts, page)
+    const env = await fetchPage(path, opts, opts.page, offset)
     if (!env) return i === 0 ? null : { data: kept, meta }
     meta = env.meta ?? meta
     const rows = env.data ?? []
     for (const row of rows) {
-      if (kept.length >= opts.limit) break
-      if (!isExcludedSource(row.source, excluded)) kept.push(row)
+      if (kept.length >= target) break
+      if (isExcludedSource(row.source, excluded)) continue
+      // The ranking can shift between requests (each one is a separate query),
+      // so a row can legitimately arrive twice; a duplicate must not eat a slot.
+      const key = row.public_slug ?? `${row.source ?? ""}:${row.external_id ?? ""}`
+      if (seen.has(key)) continue
+      seen.add(key)
+      kept.push(row)
     }
-    // Stop once the page is full, or once the API has no more rows to give: a
-    // short page is the end of the result set, and asking again would just
-    // repeat an empty answer.
-    if (kept.length >= opts.limit || rows.length < opts.limit) break
+    if (kept.length >= target || rows.length < opts.limit) break
+    offset += rows.length
   }
-  return { data: kept, meta }
+  return { data: kept.slice(skip, target), meta }
 }
 
 export async function runSearch(opts: SearchOpts): Promise<number> {
   try {
     const path = opts.includeDescription === false ? LEAN_SEARCH_PATH : SEARCH_PATH
     const excluded = normaliseSources(opts.excludeSources)
-    const env = excluded.length === 0 ? await fetchPage(path, opts, 1) : await fetchFiltered(path, opts, excluded)
+    const env = excluded.length === 0 ? await fetchPage(path, opts, opts.page) : await fetchFiltered(path, opts, excluded)
     // A 404 here is a missing endpoint, not a missing job: a freehire instance
     // older than the agent search surface answers that way, and reporting it as
     // an empty result set would hide the misconfiguration behind plausible output.
