@@ -131,6 +131,14 @@ Facet filters (values come from freehire's controlled vocabularies; comma-separa
 - `--company <slug>` — company slug (from a result's `company_slug`)
 - `--remote <mode>` — `remote` | `hybrid` | `onsite` (`work_mode` facet). A bare `--remote` means `remote`. Comma-separate for OR (`remote,hybrid`; `on-site` normalises to `onsite`). An unknown item exits 1 with `BAD_ARG`.
 - `--facet <key=value>` — any other facet param (repeatable), e.g. `--facet salary_min=100000`
+- `--exclude-source <name>` — drop an aggregator source (repeatable), e.g. `--exclude-source whatjobs`. Matches the source and its per-country variants (`whatjobs-ae`, `whatjobs-ca`, `whatjobs-pl`, …). Applied **client-side**: freehire's `source` facet only includes, and an unsupported exclusion parameter is ignored rather than rejected, so a server-side attempt would return everything while looking like it worked. The CLI backfills from later pages so the page stays full, and marks `meta.total_is_unfiltered` because the API computes `total` before the exclusion.
+
+> **Why `whatjobs` is excluded by default.** freehire re-publishes whatjobs.com's
+> paid-traffic listings (`pub_api__cpl__…` URLs). They are mostly recruiter
+> reposts of roles already on the ATS boards, they carry no reliable company
+> identity, and in this workspace they were 211 of 961 scraped postings (22%) and
+> 5 of 37 in the apply queue. `search-queries.md` passes
+> `--exclude-source whatjobs` on every freehire call; drop the flag to see them.
 
 > **Location is a facet, not free text.** Unlike `linkedin-search`'s `--location`,
 > freehire filters geography through the structured `--region`/`--country`/`--city`
@@ -180,6 +188,9 @@ bun run .agents/skills/freehire-search/cli/src/cli.ts search -q "platform engine
 
 # Full details for a specific job
 bun run .agents/skills/freehire-search/cli/src/cli.ts detail golang-zensar-2bxu6dxm --format plain
+
+# This workspace's default: whatjobs' paid-traffic reposts filtered out
+bun run .agents/skills/freehire-search/cli/src/cli.ts search -q "backend engineer" --remote --jobage 14 --exclude-source whatjobs --format table
 ```
 
 ## Output formats

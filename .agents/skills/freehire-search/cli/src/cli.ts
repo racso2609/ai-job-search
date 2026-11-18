@@ -36,13 +36,14 @@ function parseFlags(argv: string[]): Flags {
       value = next
       i++
     }
-    // --facet repeats; collect into an array. Everything else is last-wins.
-    if (key === "facet") {
-      const acc = Array.isArray(flags.facet) ? flags.facet : []
+    // --facet and --exclude-source repeat; collect into an array. Everything
+    // else is last-wins.
+    if (key === "facet" || key === "exclude-source") {
+      const acc = Array.isArray(flags[key]) ? (flags[key] as string[]) : []
       // Preserve a bare occurrence so validation can reject it instead of
       // silently dropping the requested filter, even after a valid --facet.
       acc.push(typeof value === "string" ? value : "")
-      flags.facet = acc
+      flags[key] = acc
     } else {
       flags[key] = value
     }
@@ -103,6 +104,10 @@ FACET FILTERS (values from freehire.me's controlled vocabularies; comma = OR)
   --remote <mode>         remote | hybrid | onsite (work_mode facet).
                           A bare --remote means remote. Comma = OR. Unknown values exit 1.
   --facet <key=value>     Any other facet param (repeatable), e.g. --facet salary_min=100000
+  --exclude-source <name> Drop an aggregator source (repeatable), e.g.
+                          --exclude-source whatjobs. Matches the source and its
+                          per-country variants (whatjobs-ca, whatjobs-pl, …).
+                          Applied client-side: the API's source facet only includes.
 
 DETAIL
   <slug|url>              A freehire public slug (from a search result's id/slug)
@@ -179,6 +184,7 @@ const KNOWN_FLAGS: Record<string, Set<string>> = {
   search: new Set([
     "query", "category", "city", "company", "country", "facet", "format", "jobage", "limit",
     "page", "region", "remote", "seniority", "skill", "description-format", "no-description", "help", "h",
+    "exclude-source",
   ]),
   detail: new Set(["format", "help", "h"]),
 }
@@ -231,6 +237,19 @@ async function main(): Promise<number> {
         JSON.stringify({ error: `--format must be one of json|table|plain, got "${fmt}"`, code: "BAD_ARG" }) + "\n",
       )
       return 1
+    }
+
+    // A bare --exclude-source would otherwise read as "exclude nothing" and
+    // return the very source the caller asked to drop - the failure mode this
+    // flag exists to prevent, so it is rejected rather than ignored.
+    const rawExcludes = Array.isArray(flags["exclude-source"]) ? (flags["exclude-source"] as string[]) : []
+    for (const item of rawExcludes) {
+      if (!item.trim()) {
+        process.stderr.write(
+          JSON.stringify({ error: `--exclude-source requires a non-empty source name`, code: "BAD_ARG" }) + "\n",
+        )
+        return 1
+      }
     }
 
     // Validated here rather than server-side: the API answers an unrecognized
@@ -298,6 +317,7 @@ async function main(): Promise<number> {
       skills: commaList(flags.skill),
       company: stringFlag(flags.company),
       workMode: parsedRemote.value,
+      excludeSources: rawExcludes,
       facets,
     }
     return runSearch(opts)
