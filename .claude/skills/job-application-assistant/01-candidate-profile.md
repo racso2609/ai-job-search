@@ -1,5 +1,5 @@
 ---
-framework_version: 1.1.1
+framework_version: 1.1.2
 ---
 
 # Candidate Profile
@@ -11,13 +11,13 @@ framework_version: 1.1.1
 
 ## Identity
 - **Name:** Oscar Lugo
-- **Location:** Remote (UTC) — based in Venezuela, works remotely worldwide
+- **Location:** Remote — based in Venezuela (UTC-4). The CV states "Remote (UTC)"; the real offset is UTC-4.
 - **Phone:** [PENDIENTE] — no source document carries a phone number
 - **Email:** oscaremiliolugo@gmail.com
 - **LinkedIn:** https://www.linkedin.com/in/oscar-lugo-112800210/
 - **GitHub:** https://github.com/racso2609
 - **Status:** Employed — Co-Founder & Technical Lead at Dlocs; currently also senior contractor on two Dlocs clients (Aurantis, Hyxora). Open to senior/lead roles.
-- **Constraints:** Remote only. Timezone UTC (LatAm), which overlaps fully with US Eastern and partially with EU afternoons. No relocation.
+- **Constraints:** Remote only. Timezone UTC-4 (Venezuela), which overlaps fully with US Eastern business hours and partially with EU afternoons. No relocation.
 
 ### Languages
 <!-- Feeds the Language Gate in 04-job-evaluation.md. An undeclared language is a
@@ -135,10 +135,10 @@ Part-time
 
 ### Domain Expertise
 - Blockchain/Web3: EVM, Solana (SPL), smart contracts, DeFi, wallet and key management, DID / self-sovereign identity, cross-chain/relay
-- Blockchain data providers: Alchemy, Moralis, Zerion, subgraphs
+- Blockchain data providers: Alchemy, Moralis, Zerion
 - Backend architecture: hexagonal (ports & adapters), microservices, Kafka event streaming, WebSocket real-time, distributed rate limiting and failover
 - Databases: PostgreSQL (partitioning, composite indexes, versioned migrations), MongoDB/Mongoose, Redis
-- Web3 transaction engineering: nonce management, gas optimisation, DEX router integration and cross-venue price aggregation
+- Web3 transaction engineering: nonce management, gas optimisation
 
 ### Software & Tools
 - Docker, CI/CD (GitHub Actions), Linux, systemd, MCP
