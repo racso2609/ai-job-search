@@ -20,13 +20,21 @@
     "calendar": {
       "type": "local",
       "command": [
-        "bun",
-        "x",
-        "@cocal/google-calendar-mcp"
+        "/home/racsolab/.npm-global/bin/google-calendar-mcp"
       ],
-      "enabled": false,
+      "enabled": true,
       "environment": {
-        "GOOGLE_OAUTH_CREDENTIALS": "{env:GOOGLE_OAUTH_CREDENTIALS}"
+        "GOOGLE_OAUTH_CREDENTIALS": "/home/racsolab/work/ai-job-search/service/secrets/gcp-oauth.keys.json"
+      }
+    },
+    "gmail-imap": {
+      "type": "local",
+      "command": [
+        "/home/racsolab/.npm-global/bin/imap-mcp"
+      ],
+      "enabled": true,
+      "environment": {
+        "IMAP_MCP_READ_ONLY": "true"
       }
     }
   },

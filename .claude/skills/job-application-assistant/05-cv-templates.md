@@ -1,5 +1,5 @@
 ---
-framework_version: 1.4.8
+framework_version: 1.5.0
 ---
 
 # CV Templates and Tailoring Guide
@@ -95,6 +95,78 @@ Expected output: `Output written on main_<company>_<role>.pdf (2 pages, ...)`. A
 
 The `\renewcommand*` on `\namefont` and the three `\colorlet` lines in the preamble are required on lualatex+MiKTeX. Without them the name and section headings render in black even though `\moderncvcolor{blue}` is set, which looks inconsistent with the rest of the blue accent scheme (links, bullet markers, contact icons). The cause: `moderncvstylebanking.sty` defines the name colours with `\colorlet`, which *copies* the accent colour as it is before the scheme is applied, so the name colours are frozen to the pre-scheme value; re-assigning them with `\colorlet` after `\moderncvcolor{blue}` (as the preamble does) re-pins them to `color1`. `\namefont` is the shared hook every name-style macro routes through, so the block is version-agnostic - including moderncv 2.3.1 from Debian/Ubuntu apt, which has no `\firstnamestyle`/`\lastnamestyle` at all. Both names render bold; if you prefer regular weight, change `\bfseries` to `\mdseries` in the `\namefont` line (the weight now lives there, so it applies to the whole name). Don't drop the overrides - on most modern installs the defaults render visibly wrong.
 
+### Entry order: the job title must precede the employer (ATS)
+
+`moderncvstylebanking.sty` loads body style 3, whose `\cventry` prints the
+**employer** (`#4`) on the first line and the **job title** (`#3`) on the
+second. The rendered page looks plausible, but the text layer an ATS reads
+comes out inverted:
+
+```
+🟤 Moneva Part-timeSenior Back End Developer 2025-02 - 2026-02
+```
+
+A parser that assigns the line under the dates to the title field records the
+employer there and the title as the organization - and a human skimming the
+PDF sees the same inversion. Every tailored CV therefore carries this override,
+placed just before `\begin{document}`:
+
+```latex
+\makeatletter
+\renewcommand*{\cventry}[7][.25em]{%
+  \begin{tabular*}{\maincolumnwidth}{@{}l@{\extracolsep{\fill}}r@{}}%
+    {\bfseries #3} & {\itshape #2}%
+  \end{tabular*}%
+  \ifboolexpr{%
+    test {\ifstrempty{#4}}
+    and
+    test {\ifstrempty{#5}}}%
+    {}%
+    {\par\noindent{\itshape #4\ifstrempty{#5}{}{, #5}}}%
+  \ifx&#7&%
+  \else{\\%
+    \begin{minipage}{\maincolumnwidth}%
+      \small#7%
+    \end{minipage}}\fi%
+  \par\addvspace{#1}}
+\makeatother
+```
+
+Two details are load-bearing:
+
+- **The employer line is a `\par`, not a second tabular row.** In a second row
+  the dates sit in the right cell and the employer in the left cell of the
+  *same* row, so the two strings run together in the text layer
+  (`2023-12 - PresentDlocs, Remote`) and no parser can split them.
+- **`#3` keeps `\bfseries` and `#4` becomes `\itshape`**, matching the visual
+  weight the banking style used before, so the page reads the same and only the
+  order changes.
+
+Verify it on the extracted text, not on the rendered page:
+
+```bash
+python3 tools/verify_pdf.py cv/main_<company>_<role>.pdf --dump-text cv/main_<company>_<role>.txt
+grep -A1 '🟤' cv/main_<company>_<role>.txt | head
+```
+
+The line after each bullet marker must be the title, and the line after that
+the employer.
+
+### Profile links must be printed, not only linked
+
+`\extrainfo{\href{...}{LinkedIn}}` renders the word "LinkedIn" as the link
+text, and the URL itself lives only in the PDF's link annotation - **not in the
+text layer**. An ATS reading the layer sees the label and no address, so the
+profile is unreachable from the parsed record. Print the URL as the link text
+instead:
+
+```latex
+\extrainfo{\href{https://www.linkedin.com/in/<handle>}{linkedin.com/in/<handle>},
+           \href{https://github.com/<handle>}{github.com/<handle>}}
+```
+
+The email is already printed as literal text by `\email`, so it needs nothing.
+
 ### Spacing inside itemize lists (important)
 
 **Do not place `\vspace{...}` between `\item` entries in an `itemize` list.** Even though the source looks symmetric, this pattern occasionally produces a noticeably oversized gap before a single item: the inter-item `\vspace` creates a paragraph break that interacts unpredictably with the list's internal `\itemsep`, so LaTeX renders one of the gaps wider than the rest. Remove the inter-item `\vspace` and let `itemize` use its native uniform spacing.
@@ -179,6 +251,31 @@ Claiming a credential not yet held is a factual misstatement, and it is the kind
 - Rewrite bullet points to emphasize aspects most relevant to the target role
 - Use 4-6 bullets for most recent role, 3-4 for previous, 2-3 for older
 - **Emphasize measurable results** where possible: "Reduced processing time by X%", "Model adopted by the team"
+
+#### Client projects and overlapping engagements nest under their employer
+
+An engagement that ran **concurrently with, or inside, another employment** must not appear as a sibling `\cventry`. Two parallel entries with overlapping dates read as job-hopping to a human, and an ATS that fills a title field per date range records two simultaneous full-time roles. Nest it as a sub-entry inside the employer that contained it:
+
+```latex
+\item{\cventry{2022-07 - 2024-02}{FullStack-Blockchain Developer}{AllianceBlock}{Full-time}{}{\vspace{1pt}
+\begin{itemize}
+    \item {<employer-level bullet>}
+    \item {\textbf{NexeraID} --- \emph{Blockchain Developer}, 2023-03 - 2024-02
+\begin{itemize}
+            \item {<project bullet>}
+        \end{itemize}}
+    \end{itemize}}}
+```
+
+Rules that make this survive both readers:
+
+- **The sub-entry carries its own date range**, so the overlap is stated rather than hidden. The employer's range stays the outer one.
+- **`\textbf{Name} --- \emph{Title}, dates` on one line.** The title comes before any employer-ish string, same as the `\cventry` override above: a parser reading the line gets the role first.
+- **Only nest when the dates genuinely overlap.** A separate employer with a non-overlapping range stays a top-level `\cventry` — nesting it would claim a relationship that does not exist.
+- **Do not add `\vspace` between the sub-entries** (see the itemize spacing note above); the nested `itemize` already separates them.
+- **The employer must still exist as a top-level entry.** If the CV never mentioned the containing employer (e.g. the project was the only thing listed), add the employer entry first — otherwise the sub-entry has no parent and reads as an orphan.
+
+This is a content rule, not a formatting one: it changes what the CV asserts about who employed whom, so it applies to every tailored CV, not just the ones where the layout was tight.
 
 #### Check tenure against visible output
 

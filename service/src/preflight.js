@@ -157,10 +157,15 @@ function mcpStatus(server) {
 }
 
 check("MCP: gmail connected", () => {
-  const s = mcpStatus("gmail")
-  if (s === "connected") return { ok: true, detail: "connected" }
-  return { ok: false, detail: s || "not configured" }
-}, { critical: false, hint: "enable in opencode.json + 'opencode mcp auth gmail' (see service/INSTALL.md)" })
+  // Gmail is served by the local IMAP bridge (`gmail-imap`), which reads the
+  // mailbox with an app password. The OAuth `gmail` server needs a browser
+  // callback and stays disabled on a headless host; accept either name.
+  const statuses = ["gmail-imap", "gmail"].map((name) => [name, mcpStatus(name)])
+  const ok = statuses.find(([, status]) => status === "connected")
+  if (ok) return { ok: true, detail: `connected (${ok[0]})` }
+  const seen = statuses.filter(([, status]) => status).map(([n, s]) => `${n}: ${s}`)
+  return { ok: false, detail: seen.join(", ") || "not configured" }
+}, { critical: false, hint: "see service/INSTALL.md: local IMAP bridge (gmail-imap) or 'opencode mcp auth gmail'" })
 
 check("MCP: calendar connected", () => {
   const s = mcpStatus("calendar")
