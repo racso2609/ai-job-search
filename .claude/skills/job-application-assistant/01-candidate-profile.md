@@ -61,7 +61,7 @@ Remote
 - Led engineering strategy and lightweight Agile sprints, reducing delivery cycles by 25%. Main client: Hyxora (DeFi wallet).
 
 ### Senior Back End Developer - Moneva (2025-02 - 2026-02)
-Remote · Part-time (concurrent with Dlocs)
+Part-time
 - Architected a real-time activity pipeline (capturing, indexing and storing blockchain wallet events) with peaks of 5,000 events/sec across 3 chains, using Kafka as the bus between ingestion and consumers.
 - Designed Kafka topics and a per-wallet-address partition key to guarantee per-account ordering, with idempotent consumers (at-least-once) and offset resets to rebuild state.
 - Built secure APIs and DID-based auth flows for wallet onboarding: 25,000+ users and 99.5% login success rate.
@@ -70,38 +70,41 @@ Remote · Part-time (concurrent with Dlocs)
 - Delivered 6 microservices end-to-end with 99.9% uptime in production.
 
 ### Blockchain Developer - Parifi (2024-12 - 2025-06)
-Remote · Part-time (concurrent with Dlocs)
+Part-time
 - Built a transaction manager for massive volumes of Web3 transactions with a nonce tracker serialising concurrent submissions, eliminating nonce collisions and dropped transactions.
 - Managed 500,000+ on-chain transactions with a 99.9% inclusion rate and no stuck or rejected nonces.
 - Developed smart contracts and backend services for a DeFi derivatives protocol: 100,000 transactions with 25% lower gas costs.
 - Shipped 12 audit-cleared smart contracts and contributed to 4 protocol releases across 3 chains; real-time on-chain data feeds at 50 ms.
 
 ### Blockchain Developer - NexeraID (2023-03 - 2024-02)
-Remote
+A team inside AllianceBlock (not a separate employer, not an EYSS engagement of its own)
 - Self-sovereign identity issuance and verification platform: onboarding users to Web3 with self-custodial and custodial wallets.
 - Worked on on-chain identity (soulbound NFTs) and compliance workflows while preserving privacy.
 - JavaScript, Solidity and smart-contract stack.
 
 ### FullStack-Blockchain Developer - AllianceBlock (2022-07 - 2024-02)
-Client engagement delivered through EYSS (never hired direct by AllianceBlock)
+Full-time
+- Client engagement delivered through EYSS for the whole span; never hired directly by AllianceBlock.
+- NexeraID (2023-03 - 2024-02) was a team inside AllianceBlock, so it nests here rather than standing on its own.
 - Developed frontend modules and integration flows bridging institutional finance frameworks with Web3 decentralised liquidity applications.
 - Implemented dApp features in JavaScript/TypeScript consumed by institutional users, integrating 8 institutional finance APIs.
 - Shipped 15 end-to-end features across 5 product releases. Stack: JavaScript, Rust.
 
 ### Senior Team Lead - Leaderdao.AI (2022-12 - 2023-11)
-Side project run inside EYSS · Part-time
+Part-time
+- Side project run inside EYSS.
 - Led development of a DAO governance protocol (community voting, airdrop distribution and community-project support).
 - Designed the proposal/voting flow end-to-end and led a 6-person engineering team through 12 releases.
 - Mentored developers on Solidity, smart-contract testing and release discipline.
 
-### Blockchain Developer - CUB3 (2022-05 - 2022-08)
-Project delivered inside EYSS (not a separate employer)
+### Blockchain Developer - CUB3 (2022-05 - 2022-06)
+Client project inside EYSS (2021-05 - 2024-02), not a separate employer; ended one month before AllianceBlock started
 - Built web-based user experiences in React and integrated real-time data backends with Firebase.
 - Shipped 10 interactive features with real-time data sync.
 
 ### Javascript FullStack Developer - EYSS (2021-05 - 2024-02)
-Full-time · software development factory (outsourced delivery)
-- Employed by EYSS for the whole span; AllianceBlock, CUB3 and Leaderdao.AI were engagements run inside it, not separate employers.
+Full-time
+- Software development factory (outsourced delivery). Employed by EYSS for the whole span: AllianceBlock (2022-07 - 2024-02), CUB3 (2022-05 - 2022-06) and Leaderdao.AI (2022-12 - 2023-11) were engagements run inside it, not separate employers. The account ran to 2024-02, when Dlocs was already being founded.
 - Designed scalable API routes, server logic and structured database collections using the core Node.js ecosystem.
 - Implemented responsive web features and application UI elements with modern JavaScript frameworks.
 
