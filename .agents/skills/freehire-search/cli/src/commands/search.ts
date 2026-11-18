@@ -1,4 +1,4 @@
-import { apiGet, stripInvisible, toResult, writeError, type FreehireJob, type JobResult } from "../helpers.js"
+import { apiGet, stripInvisible, toResult, writeError, type Envelope, type FreehireJob, type JobResult } from "../helpers.js"
 
 // The agent variant of the job search: the same query, ranking, and facets as the
 // web's /jobs/search, but each hit carries the posting's full description instead
@@ -37,15 +37,20 @@ export interface SearchOpts {
   skills: string[]
   company?: string
   workMode?: string // work_mode facet: remote | hybrid | onsite
+  // Aggregator sources to drop from the results (exact match on the API's
+  // `source`, or on its prefix for the per-country variants such as
+  // "whatjobs-ca"). The API's `source` facet only includes, so the exclusion is
+  // applied here; see runSearch's paging note.
+  excludeSources: string[]
   // Arbitrary facet escape hatch: param -> values, for the long tail of the vocabulary.
   facets: Record<string, string[]>
 }
 
-function buildQuery(opts: SearchOpts): URLSearchParams {
+function buildQuery(opts: SearchOpts, page = opts.page): URLSearchParams {
   const p = new URLSearchParams()
   if (opts.query) p.set("q", opts.query)
   p.set("limit", String(opts.limit))
-  p.set("offset", String((opts.page - 1) * opts.limit))
+  p.set("offset", String((page - 1) * opts.limit))
   if (opts.includeDescription !== false) p.set("description_format", opts.descriptionFormat)
   if (opts.jobage > 0 && opts.jobage < 9999) p.set("posted_within_days", String(opts.jobage))
   if (opts.workMode) p.set("work_mode", opts.workMode)
@@ -161,10 +166,88 @@ function warnOnUnknownRegion(opts: SearchOpts): void {
   )
 }
 
+/**
+ * Normalise `--exclude-source` values: trimmed, lowercased, deduplicated, empty
+ * dropped. Lowercasing is safe because freehire's `source` values are lowercase
+ * slugs, and it keeps `--exclude-source WhatJobs` from silently matching nothing.
+ */
+export function normaliseSources(values: string[] | undefined): string[] {
+  const seen = new Set<string>()
+  for (const raw of values ?? []) {
+    const value = raw.trim().toLowerCase()
+    if (value) seen.add(value)
+  }
+  return [...seen]
+}
+
+/**
+ * Whether a posting's `source` is excluded. freehire's `source` facet is
+ * per-market ("whatjobs-ae", "whatjobs-ca", "whatjobs-pl" …) while the facet
+ * vocabulary lists only the bare aggregator name, so a plain equality test would
+ * let every country variant through. Matching the name itself or the name
+ * followed by a dash covers both shapes without matching an unrelated source
+ * that merely starts with the same letters ("whatjobsomething" stays in).
+ */
+export function isExcludedSource(source: string | null | undefined, excluded: string[]): boolean {
+  if (!source) return false
+  const value = source.trim().toLowerCase()
+  return excluded.some((name) => value === name || value.startsWith(`${name}-`))
+}
+
+/** One page of results from the search endpoint, or null when the endpoint is missing. */
+function fetchPage(path: string, opts: SearchOpts, page: number): Promise<Envelope<FreehireJob[]> | null> {
+  return apiGet<FreehireJob[]>(`${path}?${buildQuery(opts, page).toString()}`)
+}
+
+// How many pages a filtered search will read before giving up on filling the
+// caller's page size. The API caps offset+limit at 10000, so this bound is about
+// cost, not reachability: each page is a full request with hydrated bodies, and a
+// query whose results are mostly excluded could otherwise walk thousands of rows
+// to fill 25 slots. Five pages keeps a normal run at one or two requests while
+// still returning a full page for a source that supplies ~half the corpus.
+const MAX_FILTER_PAGES = 5
+
+/**
+ * Fetch the caller's page, dropping excluded sources and backfilling from later
+ * pages so the exclusion does not silently shrink the result set.
+ *
+ * The API's `source` facet only includes (`source=whatjobs` narrows to it); there
+ * is no exclusion parameter, and an unsupported one is ignored rather than
+ * rejected - so `exclude_source=whatjobs` returns everything and a caller would
+ * never know the filter did nothing. Filtering client-side is therefore the only
+ * honest option, and it has to page: dropping ~20% of a page and returning 20 of
+ * 25 rows would look like a thin market instead of a filter.
+ */
+async function fetchFiltered(
+  path: string,
+  opts: SearchOpts,
+  excluded: string[],
+): Promise<Envelope<FreehireJob[]> | null> {
+  const kept: FreehireJob[] = []
+  let meta: Envelope<FreehireJob[]>["meta"]
+  for (let i = 0; i < MAX_FILTER_PAGES; i++) {
+    const page = opts.page + i
+    const env = await fetchPage(path, opts, page)
+    if (!env) return i === 0 ? null : { data: kept, meta }
+    meta = env.meta ?? meta
+    const rows = env.data ?? []
+    for (const row of rows) {
+      if (kept.length >= opts.limit) break
+      if (!isExcludedSource(row.source, excluded)) kept.push(row)
+    }
+    // Stop once the page is full, or once the API has no more rows to give: a
+    // short page is the end of the result set, and asking again would just
+    // repeat an empty answer.
+    if (kept.length >= opts.limit || rows.length < opts.limit) break
+  }
+  return { data: kept, meta }
+}
+
 export async function runSearch(opts: SearchOpts): Promise<number> {
   try {
     const path = opts.includeDescription === false ? LEAN_SEARCH_PATH : SEARCH_PATH
-    const env = await apiGet<FreehireJob[]>(`${path}?${buildQuery(opts).toString()}`)
+    const excluded = normaliseSources(opts.excludeSources)
+    const env = excluded.length === 0 ? await fetchPage(path, opts, 1) : await fetchFiltered(path, opts, excluded)
     // A 404 here is a missing endpoint, not a missing job: a freehire instance
     // older than the agent search surface answers that way, and reporting it as
     // an empty result set would hide the misconfiguration behind plausible output.
@@ -183,19 +266,22 @@ export async function runSearch(opts: SearchOpts): Promise<number> {
       rows = rows.map((r) => ({ ...r, description: null }))
     }
     const total = env.meta?.total ?? rows.length
+    // `total` is the index's estimate for the query, computed before any
+    // exclusion, so a run that drops sources must not present it as the count of
+    // what it returned. Saying so beats a number that silently disagrees with the
+    // rows below it.
+    const meta: Record<string, unknown> = { count: rows.length, page: opts.page, total }
+    if (excluded.length > 0) {
+      meta.total_is_unfiltered = true
+      meta.excluded_sources = excluded
+    }
 
     if (opts.format === "table") {
       process.stdout.write(renderTable(rows) + "\n")
     } else if (opts.format === "plain") {
       process.stdout.write(renderPlain(rows) + "\n")
     } else {
-      process.stdout.write(
-        JSON.stringify(
-          { meta: { count: rows.length, page: opts.page, total }, results: rows },
-          null,
-          2,
-        ) + "\n",
-      )
+      process.stdout.write(JSON.stringify({ meta, results: rows }, null, 2) + "\n")
     }
     // After stdout: a diagnostic must never interleave with the JSON, and the exit
     // code stays 0 because a wrong filter value is not a failure of the request.
