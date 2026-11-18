@@ -83,13 +83,13 @@ Remote
 - JavaScript, Solidity and smart-contract stack.
 
 ### FullStack-Blockchain Developer - AllianceBlock (2022-07 - 2024-02)
-Full-time
+Client engagement delivered through EYSS (never hired direct by AllianceBlock)
 - Developed frontend modules and integration flows bridging institutional finance frameworks with Web3 decentralised liquidity applications.
 - Implemented dApp features in JavaScript/TypeScript consumed by institutional users, integrating 8 institutional finance APIs.
 - Shipped 15 end-to-end features across 5 product releases. Stack: JavaScript, Rust.
 
 ### Senior Team Lead - Leaderdao.AI (2022-12 - 2023-11)
-Remote · Part-time
+Side project run inside EYSS · Part-time
 - Led development of a DAO governance protocol (community voting, airdrop distribution and community-project support).
 - Designed the proposal/voting flow end-to-end and led a 6-person engineering team through 12 releases.
 - Mentored developers on Solidity, smart-contract testing and release discipline.
@@ -99,8 +99,9 @@ Project delivered inside EYSS (not a separate employer)
 - Built web-based user experiences in React and integrated real-time data backends with Firebase.
 - Shipped 10 interactive features with real-time data sync.
 
-### Javascript FullStack Developer - EYSS (2021-05 - 2022-07)
-Full-time
+### Javascript FullStack Developer - EYSS (2021-05 - 2024-02)
+Full-time · software development factory (outsourced delivery)
+- Employed by EYSS for the whole span; AllianceBlock, CUB3 and Leaderdao.AI were engagements run inside it, not separate employers.
 - Designed scalable API routes, server logic and structured database collections using the core Node.js ecosystem.
 - Implemented responsive web features and application UI elements with modern JavaScript frameworks.
 

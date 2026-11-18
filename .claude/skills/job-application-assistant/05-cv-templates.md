@@ -258,14 +258,19 @@ Claiming a credential not yet held is a factual misstatement, and it is the kind
 An engagement that ran **inside another employment** — a client project delivered through a contractor or software factory, an internal project, a secondment — must not appear as a sibling `\cventry`. Two entries with overlapping dates read as job-hopping to a human, and an ATS that fills a title field per date range records two simultaneous full-time roles. Nest it as a sub-entry inside the employer that contained it:
 
 ```latex
-\item{\cventry{2022-07 - 2024-02}{FullStack-Blockchain Developer}{AllianceBlock}{Full-time}{}{\vspace{1pt}
+\item{\cventry{2021-05 - 2024-02}{Javascript FullStack Developer}{EYSS}{Full-time}{}{\vspace{1pt}
 \begin{itemize}
     \item {<employer-level bullet>}
-    \item {\textbf{NexeraID} --- \emph{Blockchain Developer}, 2023-03 - 2024-02
-\begin{itemize}
-            \item {<project bullet>}
+    \item {\textbf{AllianceBlock} --- \emph{FullStack-Blockchain Developer (client)}, 2022-07 - 2024-02
+        \begin{itemize}
+            \item {<client-project bullet>}
+            \item {\textbf{NexeraID} --- \emph{Blockchain Developer}, 2023-03 - 2024-02: <project bullet>}
         \end{itemize}}
-    \end{itemize}}}
+    \item {\textbf{Leaderdao.AI} --- \emph{Senior Team Lead (side project)}, 2022-12 - 2023-11
+        \begin{itemize}
+            \item {<side-project bullet>}
+        \end{itemize}}
+\end{itemize}}}
 ```
 
 Rules that make this survive both readers:
@@ -275,6 +280,8 @@ Rules that make this survive both readers:
 - **Only nest when the dates genuinely overlap.** A separate employer with a non-overlapping range stays a top-level `\cventry` — nesting it would claim a relationship that does not exist.
 - **Nesting asserts a containment relationship, not merely a date overlap.** Nest only when the outer employer actually ran the engagement (contractor, client account, secondment). Two **independent** contracts that happen to overlap — a part-time job alongside a full-time one — stay as sibling top-level entries, each stating its contract type (see the next section). Nesting those would claim a reporting line that never existed.
 - **Do not add `\vspace` between the sub-entries** (see the itemize spacing note above); the nested `itemize` already separates them.
+- **Confirm the employment relationship before nesting, and never infer it from the dates.** A client engagement and a direct hire look identical on a CV; only the candidate knows which it was. Ask before writing `(client)` or nesting, because the two produce opposite readings: a long client engagement through a contractor is one employer with a good account, while the same span as a direct hire is a normal job. Getting it wrong is a factual misstatement a reference check exposes.
+- **The umbrella entry must span the whole engagement, not just its first phase.** A contractor or software factory that kept the candidate on a client account until 2024-02 must read `2021-05 - 2024-02`; writing the date the first assignment ended (`2022-07`) makes every nested entry after that point a factual claim that cannot be true, and it manufactures an overlap with whatever came next. Check the outer range against the last nested end date before finalizing.
 - **The employer must still exist as a top-level entry.** If the CV never mentioned the containing employer (e.g. the project was the only thing listed), add the employer entry first — otherwise the sub-entry has no parent and reads as an orphan.
 
 This is a content rule, not a formatting one: it changes what the CV asserts about who employed whom, so it applies to every tailored CV, not just the ones where the layout was tight.
