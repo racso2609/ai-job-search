@@ -252,9 +252,10 @@ Claiming a credential not yet held is a factual misstatement, and it is the kind
 - Use 4-6 bullets for most recent role, 3-4 for previous, 2-3 for older
 - **Emphasize measurable results** where possible: "Reduced processing time by X%", "Model adopted by the team"
 
+
 #### Client projects and overlapping engagements nest under their employer
 
-An engagement that ran **concurrently with, or inside, another employment** must not appear as a sibling `\cventry`. Two parallel entries with overlapping dates read as job-hopping to a human, and an ATS that fills a title field per date range records two simultaneous full-time roles. Nest it as a sub-entry inside the employer that contained it:
+An engagement that ran **inside another employment** — a client project delivered through a contractor or software factory, an internal project, a secondment — must not appear as a sibling `\cventry`. Two entries with overlapping dates read as job-hopping to a human, and an ATS that fills a title field per date range records two simultaneous full-time roles. Nest it as a sub-entry inside the employer that contained it:
 
 ```latex
 \item{\cventry{2022-07 - 2024-02}{FullStack-Blockchain Developer}{AllianceBlock}{Full-time}{}{\vspace{1pt}
@@ -272,10 +273,46 @@ Rules that make this survive both readers:
 - **The sub-entry carries its own date range**, so the overlap is stated rather than hidden. The employer's range stays the outer one.
 - **`\textbf{Name} --- \emph{Title}, dates` on one line.** The title comes before any employer-ish string, same as the `\cventry` override above: a parser reading the line gets the role first.
 - **Only nest when the dates genuinely overlap.** A separate employer with a non-overlapping range stays a top-level `\cventry` — nesting it would claim a relationship that does not exist.
+- **Nesting asserts a containment relationship, not merely a date overlap.** Nest only when the outer employer actually ran the engagement (contractor, client account, secondment). Two **independent** contracts that happen to overlap — a part-time job alongside a full-time one — stay as sibling top-level entries, each stating its contract type (see the next section). Nesting those would claim a reporting line that never existed.
 - **Do not add `\vspace` between the sub-entries** (see the itemize spacing note above); the nested `itemize` already separates them.
 - **The employer must still exist as a top-level entry.** If the CV never mentioned the containing employer (e.g. the project was the only thing listed), add the employer entry first — otherwise the sub-entry has no parent and reads as an orphan.
 
 This is a content rule, not a formatting one: it changes what the CV asserts about who employed whom, so it applies to every tailored CV, not just the ones where the layout was tight.
+
+#### State the contract type on every entry, and defuse the overlap up front
+
+Two full-time entries with overlapping dates read as job-hopping to a human and as
+two simultaneous full-time roles to an ATS. Nesting solves the case where one
+engagement lived inside another; when the engagements were genuinely **independent
+and parallel** (a part-time contract running alongside a full-time job), nesting
+would claim a reporting line that never existed, so the fix is different:
+
+- **Every entry carries its contract type in the `\cventry` location field** —
+  `Full-time`, `Part-time`, `Remote, Part-time`, `Contract`. A bare `Remote` tells
+  the reader nothing about capacity, which is exactly what makes an overlap look
+  suspicious. `Remote, Part-time` says "this ran in parallel on purpose".
+- **One line of context at the top of Professional Experience**, before the first
+  entry, stating the rule the reader is about to see:
+
+  ```latex
+  \section{Professional Experience}
+  \vspace{3pt}
+
+  \noindent{\small Contract and part-time engagements run in parallel with full-time roles; each entry states its contract type.}
+  \vspace{3pt}
+
+  \begin{itemize}
+  ```
+
+  It costs one line and disarms the bias before it forms. Keep it factual — a
+  defensive phrasing ("not job-hopping") draws attention to the thing it denies.
+- **A short project delivered inside another employment nests**, even when it is
+  only a few months: a three-month engagement listed as its own employer reads as
+  a failed probation, while the same work nested under the employer that ran it
+  reads as a project.
+
+The test for both readers: list the top-level employers only. If that list shows
+more employers than the candidate actually had, the CV is overstating the churn.
 
 #### Check tenure against visible output
 

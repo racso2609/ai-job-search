@@ -61,7 +61,7 @@ Remote
 - Led engineering strategy and lightweight Agile sprints, reducing delivery cycles by 25%. Main client: Hyxora (DeFi wallet).
 
 ### Senior Back End Developer - Moneva (2025-02 - 2026-02)
-Part-time
+Remote · Part-time (concurrent with Dlocs)
 - Architected a real-time activity pipeline (capturing, indexing and storing blockchain wallet events) with peaks of 5,000 events/sec across 3 chains, using Kafka as the bus between ingestion and consumers.
 - Designed Kafka topics and a per-wallet-address partition key to guarantee per-account ordering, with idempotent consumers (at-least-once) and offset resets to rebuild state.
 - Built secure APIs and DID-based auth flows for wallet onboarding: 25,000+ users and 99.5% login success rate.
@@ -70,7 +70,7 @@ Part-time
 - Delivered 6 microservices end-to-end with 99.9% uptime in production.
 
 ### Blockchain Developer - Parifi (2024-12 - 2025-06)
-Remote
+Remote · Part-time (concurrent with Dlocs)
 - Built a transaction manager for massive volumes of Web3 transactions with a nonce tracker serialising concurrent submissions, eliminating nonce collisions and dropped transactions.
 - Managed 500,000+ on-chain transactions with a 99.9% inclusion rate and no stuck or rejected nonces.
 - Developed smart contracts and backend services for a DeFi derivatives protocol: 100,000 transactions with 25% lower gas costs.
@@ -95,7 +95,7 @@ Remote · Part-time
 - Mentored developers on Solidity, smart-contract testing and release discipline.
 
 ### Blockchain Developer - CUB3 (2022-05 - 2022-08)
-Full-time
+Project delivered inside EYSS (not a separate employer)
 - Built web-based user experiences in React and integrated real-time data backends with Firebase.
 - Shipped 10 interactive features with real-time data sync.
 
