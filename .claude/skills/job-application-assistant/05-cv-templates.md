@@ -195,7 +195,7 @@ Two related patterns are fine and should be kept:
 
 ### Section headings must match the CV's language (important)
 
-Section headings such as `\section{Core Competencies}`, `Professional Experience`, `Education`, `Languages`, `Publications`, `Honors and Awards`, `References` (and any others your template defines), plus the `Available upon request.` line under References, are all **literal English text baked into the template** - they do not translate themselves. Whenever the CV language (see `CV language` in the candidate profile) is not English, translate every one of these too, whatever they are, not just the body prose - a CV with a fully localized profile statement and bullets sitting under untouched English section headers reads as sloppy and inconsistent, and it's an easy thing to forget precisely because the prose translation is the obvious, visible part of the job. Worked example for Spanish: `Competencias Clave`, `Experiencia Profesional`, `Educaci\'on`, `Idiomas`, `Publicaciones`, `Distinciones y Premios`, `Referencias`, `Disponibles a solicitud.` The same rule applies for any other target language - check this explicitly during the verification pass.
+Section headings such as `\section{Core Competencies}`, `Professional Experience`, `Education`, `Languages`, `Publications`, `Honors and Awards`, `References` (and any others your template defines), plus the `Available upon request.` line under References, are all **literal English text baked into the template** - they do not translate themselves. Whenever the CV language (see `CV language` in the candidate profile) is not English, translate every one of these too, whatever they are, not just the body prose - a CV with a fully localized profile statement and bullets sitting under untouched English section headers reads as sloppy and inconsistent, and it's an easy thing to forget precisely because the prose translation is the obvious, visible part of the job. Worked example for Spanish: `Competencias Clave`, `Experiencia Profesional`, `Educaci\'on`, `Idiomas`, `Publicaciones`, `Distinciones y Premios`, `Referencias`, `Disponibles a solicitud.` The same rule applies for any other target language - check this explicitly during the verification pass. It covers the Professional Experience context line too (the `\noindent{\small Contract and part-time engagements run in parallel...}` sentence): that is literal CV text, not a heading, so it is translated with the rest.
 
 ## Section-by-Section Tailoring
 
@@ -254,28 +254,75 @@ Claiming a credential not yet held is a factual misstatement, and it is the kind
 
 #### Client projects and overlapping engagements nest under their employer
 
-An engagement that ran **concurrently with, or inside, another employment** must not appear as a sibling `\cventry`. Two parallel entries with overlapping dates read as job-hopping to a human, and an ATS that fills a title field per date range records two simultaneous full-time roles. Nest it as a sub-entry inside the employer that contained it:
+An engagement that ran **inside another employment** — a client project delivered through a contractor or software factory, an internal project, a secondment — must not appear as a sibling `\cventry`. Two entries with overlapping dates read as job-hopping to a human, and an ATS that fills a title field per date range records two simultaneous full-time roles. Nest it as a sub-entry inside the employer that contained it:
 
 ```latex
-\item{\cventry{2022-07 - 2024-02}{FullStack-Blockchain Developer}{AllianceBlock}{Full-time}{}{\vspace{1pt}
+\item{\cventry{2021-05 - 2024-02}{Javascript FullStack Developer}{EYSS}{Full-time}{}{\vspace{1pt}
 \begin{itemize}
     \item {<employer-level bullet>}
-    \item {\textbf{NexeraID} --- \emph{Blockchain Developer}, 2023-03 - 2024-02
-\begin{itemize}
-            \item {<project bullet>}
+    \item {\textbf{AllianceBlock} --- \emph{FullStack-Blockchain Developer (client)}, 2022-07 - 2024-02
+        \begin{itemize}
+            \item {<client-project bullet>}
+            \item {\textbf{NexeraID} --- \emph{Blockchain Developer (AllianceBlock team)}, 2023-03 - 2024-02: <team bullet>}
         \end{itemize}}
-    \end{itemize}}}
+    \item {\textbf{CUB3} --- \emph{Blockchain Developer (client)}, 2022-05 - 2022-06
+        \begin{itemize}
+            \item {<client-project bullet>}
+        \end{itemize}}
+    \item {\textbf{Leaderdao.AI} --- \emph{Senior Team Lead (side project)}, 2022-12 - 2023-11
+        \begin{itemize}
+            \item {<side-project bullet>}
+        \end{itemize}}
+\end{itemize}}}
 ```
 
 Rules that make this survive both readers:
 
 - **The sub-entry carries its own date range**, so the overlap is stated rather than hidden. The employer's range stays the outer one.
 - **`\textbf{Name} --- \emph{Title}, dates` on one line.** The title comes before any employer-ish string, same as the `\cventry` override above: a parser reading the line gets the role first.
-- **Only nest when the dates genuinely overlap.** A separate employer with a non-overlapping range stays a top-level `\cventry` — nesting it would claim a relationship that does not exist.
+- **Nest on containment, never on a date overlap alone.** The test is whether the outer employer actually ran the engagement (contractor, client account, secondment); a shared date range on its own proves nothing. Two **independent** contracts that happen to overlap — a part-time job alongside a full-time one — stay as sibling top-level entries, each stating its contract type (see the next section); nesting those would claim a reporting line that never existed. An engagement whose range falls outside the outer entry cannot be nested at all — state it as its own top-level entry.
+- **A team inside a company nests too, and is not an engagement of its own.** A second product team, an internal squad or a rebranded business unit the candidate worked in is part of that employer, not a separate employer and not a client engagement: it nests one level deeper, inside the employer's `itemize`, and its title carries the qualifier (`Blockchain Developer (AllianceBlock team)`). It is *not* an EYSS engagement — do not promote it to a sibling of the client account it lived in.
 - **Do not add `\vspace` between the sub-entries** (see the itemize spacing note above); the nested `itemize` already separates them.
+- **Confirm the employment relationship before nesting, and never infer it from the dates.** A client engagement and a direct hire look identical on a CV; only the candidate knows which it was. Ask before writing `(client)` or nesting, because the two produce opposite readings: a long client engagement through a contractor is one employer with a good account, while the same span as a direct hire is a normal job. Getting it wrong is a factual misstatement a reference check exposes.
+- **The umbrella entry must span the whole engagement, not just its first phase.** A contractor or software factory that kept the candidate on a client account until 2024-02 must read `2021-05 - 2024-02`; writing the date the first assignment ended (`2022-07`) makes every nested entry after that point a factual claim that cannot be true, and it manufactures an overlap with whatever came next. The profile must record the umbrella's real end date (the last client-account date), not the end of the first assignment; if it is missing, ask rather than infer it from the nested entries. Check the outer range against the last nested end date before finalizing.
 - **The employer must still exist as a top-level entry.** If the CV never mentioned the containing employer (e.g. the project was the only thing listed), add the employer entry first — otherwise the sub-entry has no parent and reads as an orphan.
 
 This is a content rule, not a formatting one: it changes what the CV asserts about who employed whom, so it applies to every tailored CV, not just the ones where the layout was tight.
+
+#### State the contract type on every entry, and defuse the overlap up front
+
+Two full-time entries with overlapping dates read as job-hopping to a human and as
+two simultaneous full-time roles to an ATS. Nesting solves the case where one
+engagement lived inside another; when the engagements were genuinely **independent
+and parallel** (a part-time contract running alongside a full-time job), nesting
+would claim a reporting line that never existed, so the fix is different:
+
+- **Every entry carries its contract type in the `\cventry` location field** —
+  `Full-time`, `Part-time`, `Remote, Part-time`, `Contract`. A bare `Remote` tells
+  the reader nothing about capacity, which is exactly what makes an overlap look
+  suspicious. `Remote, Part-time` says "this ran in parallel on purpose".
+- **One line of context at the top of Professional Experience**, before the first
+  entry, stating the rule the reader is about to see:
+
+  ```latex
+  \section{Professional Experience}
+  \vspace{3pt}
+
+  \noindent{\small Contract and part-time engagements run in parallel with full-time roles; each entry states its contract type.}
+  \vspace{3pt}
+
+  \begin{itemize}
+  ```
+
+  It costs one line and disarms the bias before it forms. Keep it factual — a
+  defensive phrasing ("not job-hopping") draws attention to the thing it denies.
+- **A short project delivered inside another employment nests**, even when it is
+  only a few months: a three-month engagement listed as its own employer reads as
+  a failed probation, while the same work nested under the employer that ran it
+  reads as a project.
+
+The test for both readers: list the top-level employers only. If that list shows
+more employers than the candidate actually had, the CV is overstating the churn.
 
 #### Check tenure against visible output
 

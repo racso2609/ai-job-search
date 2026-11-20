@@ -46,15 +46,16 @@ This repo is a job application workspace. The agent acts as a career advisor and
 - **Blockchain Developer** (2024-12 - 2025-06) - **Parifi** (Remote)
   - Nonce-tracking transaction manager: 500,000+ on-chain transactions, 99.9% inclusion, no stuck nonces.
   - 12 audit-cleared contracts; 25% lower gas.
-- **Blockchain Developer** (2023-03 - 2024-02) - **NexeraID** (Remote)
+- **Blockchain Developer** (2023-03 - 2024-02) - **NexeraID** (a team inside AllianceBlock - nests under it, not a separate employer)
   - Self-sovereign identity platform; soulbound NFTs and privacy-preserving compliance.
-- **FullStack-Blockchain Developer** (2022-07 - 2024-02) - **AllianceBlock** (Full-time)
+- **FullStack-Blockchain Developer** (2022-07 - 2024-02) - **AllianceBlock** (client of EYSS, never a direct employer)
   - Bridged institutional finance with Web3 liquidity applications; 8 institutional APIs, 15 features across 5 releases.
-- **Senior Team Lead** (2022-12 - 2023-11) - **Leaderdao.AI** (Remote · Part-time)
+- **Senior Team Lead** (2022-12 - 2023-11) - **Leaderdao.AI** (side project inside EYSS, Part-time)
   - DAO governance protocol; led 6 engineers through 12 releases; mentored on Solidity.
-- **Blockchain Developer** (2022-05 - 2022-08) - **CUB3** (Full-time)
+- **Blockchain Developer** (2022-05 - 2022-06) - **CUB3** (client of EYSS, never a direct employer; ends one month before AllianceBlock starts)
   - React experiences with real-time Firebase backends.
-- **Javascript FullStack Developer** (2021-05 - 2022-07) - **EYSS** (Full-time)
+- **Javascript FullStack Developer** (2021-05 - 2024-02) - **EYSS** (Full-time, software development factory / outsourced delivery)
+  - Employed by EYSS for the whole span. AllianceBlock (2022-07 - 2024-02), CUB3 (2022-05 - 2022-06) and Leaderdao.AI (2022-12 - 2023-11) were engagements run inside it, not separate employers.
   - Scalable API routes and server logic on the Node.js ecosystem.
 - **Wordpress Developer** (2021-08 - 2021-08) - **DiplomadosOnline.com** (Part-time)
   - Backend plugins and workflow automation saving 30 hrs/month.
