@@ -58,6 +58,25 @@
 \email{[your.email@example.com]}
 \extrainfo{\href{[https://linkedin.com/in/your-profile]}{LinkedIn}, \href{[https://github.com/your-username]}{GitHub}}
 
+% --- ATS: no icon glyphs in the text layer -------------------------------
+% moderncvstylebanking.sty:64 loads \moderncvicons{symbols}; under XeTeX/LuaTeX
+% that resolves to moderncviconsawesome.sty, which redefines \labelitemi as
+% \faIcon[regular]{circle} (line 64) and the contact symbols as \faIcon (74-76).
+% Those are real characters in the PDF text layer, so an ATS sees
+% "🖂oscaremilio@gmail.com" and the email is not a token, and every bullet line
+% starts with an icon glyph. Re-define the markers with glyphs from the text
+% fonts: the bullet becomes a typographic • of the same colour (a deliberate
+% visual change) and the contact symbols disappear.
+\renewcommand*{\labelitemi}{\strut\textcolor{color1}{\large\rmfamily\textbullet}}
+\renewcommand*{\labelitemii}{\strut\textcolor{color1}{\large\bfseries-}}
+\renewcommand*{\emailsymbol}{}
+\renewcommand*{\mobilephonesymbol}{}
+
+% --- ATS: never hyphenate ------------------------------------------------
+% A word broken across lines ("transac-/ciones") is not a keyword match.
+\hyphenpenalty=10000
+\exhyphenpenalty=10000
+
 \begin{document}
 
 \makecvtitle
