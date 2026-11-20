@@ -68,6 +68,25 @@ Expected output: `Output written on main_<company>_<role>.pdf (2 pages, ...)`. A
 \usepackage[scale=0.80]{geometry}
 \usepackage{import}
 
+% ATS: no icon glyphs in the text layer.
+% moderncvstylebanking.sty:64 loads \moderncvicons{symbols}; under XeTeX/LuaTeX
+% that resolves to moderncviconsawesome.sty, which redefines \labelitemi as
+% \faIcon[regular]{circle} (line 64) and the contact symbols as \faIcon (74-76).
+% Those are real characters in the PDF's text layer - an ATS reading it sees
+% "🖂oscaremilio@gmail.com" and the email is not a token, and every bullet line
+% starts with an icon glyph. Re-define the markers with glyphs from the text
+% fonts: the bullet becomes a typographic • of the same colour (a deliberate
+% visual change), and the contact symbols disappear.
+\renewcommand*{\labelitemi}{\strut\textcolor{color1}{\large\rmfamily\textbullet}}
+\renewcommand*{\labelitemii}{\strut\textcolor{color1}{\large\bfseries-}}
+\renewcommand*{\emailsymbol}{}
+\renewcommand*{\mobilephonesymbol}{}
+
+% ATS: never hyphenate. A word broken across lines ("transac-/ciones") is not a
+% keyword match, and the hyphen survives into the extracted text.
+\hyphenpenalty=10000
+\exhyphenpenalty=10000
+
 % Personal data
 \name{[FIRST_NAME]}{[LAST_NAME]}
 % If you have no address to list, DELETE this whole line. \address{}{}{} fails
@@ -94,6 +113,68 @@ Expected output: `Output written on main_<company>_<role>.pdf (2 pages, ...)`. A
 ### Color overrides
 
 The `\renewcommand*` on `\namefont` and the three `\colorlet` lines in the preamble are required on lualatex+MiKTeX. Without them the name and section headings render in black even though `\moderncvcolor{blue}` is set, which looks inconsistent with the rest of the blue accent scheme (links, bullet markers, contact icons). The cause: `moderncvstylebanking.sty` defines the name colours with `\colorlet`, which *copies* the accent colour as it is before the scheme is applied, so the name colours are frozen to the pre-scheme value; re-assigning them with `\colorlet` after `\moderncvcolor{blue}` (as the preamble does) re-pins them to `color1`. `\namefont` is the shared hook every name-style macro routes through, so the block is version-agnostic - including moderncv 2.3.1 from Debian/Ubuntu apt, which has no `\firstnamestyle`/`\lastnamestyle` at all. Both names render bold; if you prefer regular weight, change `\bfseries` to `\mdseries` in the `\namefont` line (the weight now lives there, so it applies to the whole name). Don't drop the overrides - on most modern installs the defaults render visibly wrong.
+
+### Icon glyphs must not reach the text layer (ATS)
+
+The chain is not obvious, so read it before "simplifying" the block:
+
+1. `moderncvstylebanking.sty:64` calls `\moderncvicons{symbols}`.
+2. `moderncviconssymbols.sty:17` (under `\ifxetexorluatex` - i.e. under
+   **lualatex**, the documented engine) loads `moderncviconsawesome`.
+3. `moderncviconsawesome.sty:64` redefines `\labelitemi` as
+   `\faIcon[regular]{circle}`, and lines 74-76 give `\emailsymbol` /
+   `\mobilephonesymbol` FontAwesome glyphs.
+
+Under pdflatex the same selector loads `moderncviconsmarvosym` instead, so the
+glyphs differ - but the defect (a non-text character in the layer) is the same.
+
+Those glyphs are real characters in the PDF's text layer, outside the BMP:
+
+```
+MOBILE-ANDROID-ALT +58 424-109-4447 • 🖂 oscaremiliolugo@gmail.com
+```
+
+The email is no longer a token of its own (pypdf keeps it attached to the icon
+name; pymupdf drops the separating space), and every bullet line starts with an
+icon glyph. The rendered page looks correct, which is why this survives visual
+inspection.
+
+The preamble above re-defines all four markers with glyphs from the text fonts.
+**This is a visual change, not a no-op:** the bullet goes from a FontAwesome
+circle to a typographic `•` in the same accent colour. That is the accepted
+trade - a machine-read document beats a decorative bullet.
+
+**`tools/verify_pdf.py` does not catch this.** It does not scan for the
+`0x1F000-0x1FAFF` range, nor for an icon glued to the email, so a clean run of
+the repo's checker proves nothing here. Run this instead:
+
+```bash
+python3 - <<'PY'
+import pymupdf
+from collections import Counter
+d = pymupdf.open("cv/main_<company>_<role>.pdf")
+t = "\n".join(p.get_text() for p in d)
+bad = {hex(ord(c)): n for c, n in Counter(t).items()
+       if 0x1F000 <= ord(c) <= 0x1FAFF or 0x2600 <= ord(c) <= 0x27BF}
+print("icon glyphs:", bad or "none")
+print("FontAwesome:", [f[3] for p in d for f in p.get_fonts(full=False) if "FontAwesome" in f[3]] or "none")
+print("email token:", "your.email@example.com" in t.split())
+PY
+```
+
+Require `icon glyphs: none`, `FontAwesome: none`, and the email present as a
+standalone token. Do **not** whitelist `0x2013/0x2014/0x2022`: a correct CV also
+carries `0x2019` (apostrophes) and `0x201C/0x201D` (quotes), and a whitelist
+would fail good documents.
+
+### No hyphenation
+
+`\hyphenpenalty=10000` / `\exhyphenpenalty=10000` turn off automatic hyphenation.
+Without them a long word breaks across lines and the hyphen is part of the
+extracted text (`transac-` + newline + `ciones`), so a keyword search for
+"transacciones" fails on a CV that plainly contains it. The trade-off is looser
+inter-word spacing on some lines; that is the correct trade for a machine-read
+document.
 
 ### Entry order: the job title must precede the employer (ATS)
 

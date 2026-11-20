@@ -12,7 +12,7 @@ framework_version: 1.1.2
 ## Identity
 - **Name:** Oscar Lugo
 - **Location:** Remote — based in Venezuela (UTC-4). The CV states "Remote (UTC)"; the real offset is UTC-4.
-- **Phone:** [PENDIENTE] — no source document carries a phone number
+- **Phone:** +58 424-109-4447 (confirmed by racso 2026-11-20; printed in the CV as `+58 424-109-4447`)
 - **Email:** oscaremiliolugo@gmail.com
 - **LinkedIn:** https://www.linkedin.com/in/oscar-lugo-112800210/
 - **GitHub:** https://github.com/racso2609
