@@ -1,4 +1,5 @@
 import { Bot, InlineKeyboard, InputFile } from "grammy"
+import { createHash } from "node:crypto"
 import { join } from "node:path"
 import { config } from "./config.js"
 import { log } from "./logger.js"
@@ -13,8 +14,36 @@ let bot = null
 // Set by index.js: callbacks the bot routes taps into.
 let handlers = {}
 
+// Telegram caps callback_data at 64 bytes. Job keys are built from
+// company+title slugs and routinely blow past that (81, 88 bytes seen in
+// production), which made the API reject the whole message with
+// "400: Bad Request: BUTTON_DATA_INVALID". Buttons therefore carry a short
+// opaque id and the full key is kept in the pending store.
+const CALLBACK_DATA_MAX = 64
+
+export function callbackId(jobKey) {
+  return createHash("sha1").update(String(jobKey)).digest("hex")
+}
+
+// Fail loudly at build time instead of letting Telegram reject the message
+// after the summary was already delivered.
+export function assertCallbackData(data) {
+  const bytes = Buffer.byteLength(data, "utf8")
+  if (bytes > CALLBACK_DATA_MAX) {
+    throw new Error(
+      `callback_data too long (${bytes} > ${CALLBACK_DATA_MAX}): ${data}`,
+    )
+  }
+  return data
+}
+
 export function setHandlers(h) {
   handlers = h
+}
+
+// Test seam: lets tests drive sendSummary without a live Telegram bot.
+export function __setBotForTest(fake) {
+  bot = fake
 }
 
 export function startBot() {
@@ -45,9 +74,12 @@ async function routeCallback(ctx, action, id) {
   switch (action) {
     case "apply":
     case "skip": {
-      const meta = getPending(`job:${id}`) || pending.get(id) || {}
+      // `id` is the short opaque callback id; the real job key lives in the
+      // pending payload (see sendSummary).
+      const meta = getPending(`job:${id}`) || pending.get(`job:${id}`) || {}
+      const jobKey = meta.key ?? id
       recordDecision({
-        key: id,
+        key: jobKey,
         company: meta.company,
         role: meta.role,
         url: meta.url,
@@ -63,7 +95,7 @@ async function routeCallback(ctx, action, id) {
         })
         .catch(() => {})
       if (action === "apply" && handlers.onApply) {
-        await handlers.onApply(id, meta)
+        await handlers.onApply(jobKey, meta)
       }
       removePending(`job:${id}`)
       break
@@ -134,11 +166,12 @@ export async function sendMessage(text, extra = {}) {
 }
 
 // Sends a batch of ranked jobs: a summary plus one message per job with
-// [Apply]/[Skip] buttons. Returns the number sent.
+// [Apply]/[Skip] buttons. Returns the job keys that were actually delivered,
+// so the caller only marks those as notified.
 export async function sendSummary(jobs, { header } = {}) {
   if (!jobs.length) {
     await sendMessage("No new matches this run.")
-    return 0
+    return []
   }
 
   const lines = jobs.map((j, i) => {
@@ -163,22 +196,42 @@ export async function sendSummary(jobs, { header } = {}) {
       tail,
   )
 
+  const delivered = []
   for (const j of jobs) {
-    const id = j.key
-    const meta = { company: j.company, role: j.title, url: j.url, score: j.rank_score }
-    pending.set(id, meta)
+    // Telegram rejects the whole message if callback_data exceeds 64 bytes.
+    // Job keys are long slugs, so the button carries a short hash and the
+    // full key travels in the pending payload.
+    const id = callbackId(j.key)
+    const meta = {
+      key: j.key,
+      company: j.company,
+      role: j.title,
+      url: j.url,
+      score: j.rank_score,
+    }
+    pending.set(`job:${id}`, meta)
     addPending(`job:${id}`, meta)
     const kb = new InlineKeyboard()
-      .text("Apply", `apply:${id}`)
-      .text("Skip", `skip:${id}`)
-    await sendMessage(
-      `<b>${escapeHtml(j.title)}</b>\n${escapeHtml(j.company)}` +
-        (j.url ? `\n${escapeHtml(j.url)}` : ""),
-      { reply_markup: kb },
-    )
+      .text("Apply", assertCallbackData(`apply:${id}`))
+      .text("Skip", assertCallbackData(`skip:${id}`))
+    try {
+      await sendMessage(
+        `<b>${escapeHtml(j.title)}</b>\n${escapeHtml(j.company)}` +
+          (j.url ? `\n${escapeHtml(j.url)}` : ""),
+        { reply_markup: kb },
+      )
+      delivered.push(j.key)
+    } catch (e) {
+      // One undeliverable job must not abort the batch: the summary is already
+      // out, and a throw here skips markNotified so the whole set is retried
+      // on the next cycle.
+      log.error(`failed to send job card for ${j.key}:`, e?.message ?? e)
+      removePending(`job:${id}`)
+      pending.delete(`job:${id}`)
+    }
   }
 
-  return jobs.length
+  return delivered
 }
 
 // Sends one Gmail proposal with [Approve]/[Ignore] buttons.
