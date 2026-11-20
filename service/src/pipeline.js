@@ -56,9 +56,9 @@ export async function runScrapeCycle() {
     return
   }
 
-  await sendSummary(candidates, { header })
-  markNotified(candidates.map((j) => j.key))
-  log.info(`notified ${candidates.length} job(s)`)
+  const delivered = await sendSummary(candidates, { header })
+  markNotified(delivered)
+  log.info(`notified ${delivered.length}/${candidates.length} job(s)`)
   log.info("=== scrape cycle end ===")
 }
 
