@@ -134,16 +134,21 @@ export async function runApply(jobUrl) {
   return json
 }
 
-// Runs the headless Gmail scan. Returns the result object or null.
+// Runs the headless Gmail scan. Returns the result object, or
+// { ok: false, error } when the run produced no usable result - the same shape
+// as runApply, so the caller can log the real reason instead of "no result".
 export async function runGmailScan(args = []) {
-  const { json } = await runCommandJson("daemon-gmail", args)
+  const { json, diag } = await runCommandJson("daemon-gmail", args)
+  if (!json) return { ok: false, error: diag?.reason ?? "gmail scan produced no result" }
   return json
 }
 
-// Runs the calendar event creation for a proposal. Returns result or null.
+// Runs the calendar event creation for a proposal. Returns result, or
+// { ok: false, error } when the run produced no usable result.
 export async function runCalendar(event) {
-  const { json } = await runCommandJson("daemon-calendar", [
+  const { json, diag } = await runCommandJson("daemon-calendar", [
     JSON.stringify(event),
   ])
+  if (!json) return { ok: false, error: diag?.reason ?? "calendar produced no result" }
   return json
 }

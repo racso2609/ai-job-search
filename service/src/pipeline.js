@@ -68,8 +68,8 @@ export async function runGmailCycle() {
   log.info("=== gmail cycle start ===")
 
   const result = await runGmailScan([])
-  if (!result || result.ok === false) {
-    log.warn(`gmail scan unavailable: ${result?.error ?? "no result"}`)
+  if (result.ok === false) {
+    log.warn(`gmail scan unavailable: ${result.error ?? "no result"}`)
     log.info("=== gmail cycle end ===")
     return
   }
@@ -127,10 +127,6 @@ export async function handleApplyTap(jobKey, meta) {
   }
   await sendMessage(`Drafting your application for ${meta.company ?? ""}... this can take a few minutes.`)
   const result = await runApply(url)
-  if (!result) {
-    await sendMessage(`Draft failed for ${meta.company ?? ""} - see service logs.`)
-    return
-  }
   if (result.ok === false) {
     await sendMessage(`Draft failed: ${result.error ?? "unknown error"}`)
     return
@@ -152,8 +148,8 @@ export async function handleCalendarTap(prop) {
     return
   }
   const result = await runCalendar(prop)
-  if (!result || result.ok === false) {
-    await sendMessage(`Calendar event failed: ${result?.error ?? "unknown error"}`)
+  if (result.ok === false) {
+    await sendMessage(`Calendar event failed: ${result.error ?? "unknown error"}`)
     return
   }
   await sendMessage(

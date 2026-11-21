@@ -28,12 +28,35 @@ describe("diagnoseMissingResult", () => {
   test("flags the raw-markup degeneration seen on the BairesDev run", () => {
     // 595 tags in the real run; reproduce the shape, not the exact count.
     const noise = "</result>\n</invoke>\n</parameter>\n".repeat(200)
-    const stdout = jsonl([textEvent(noise), finishEvent("stop", { output: 5945 })])
+    const events = [textEvent(noise), finishEvent("stop", { output: 5945 })]
+    const stdout = jsonl(events)
 
-    const diag = diagnoseMissingResult({ stdout, events: [], code: 0, killed: false })
+    // `events` is populated in production (parseEvents always fills it), so pass
+    // it here too: a fixture with an empty array would skip the step-finish loop.
+    const diag = diagnoseMissingResult({ stdout, events, code: 0, killed: false })
 
     expect(diag.retryable).toBe(true)
     expect(diag.reason).toContain("markup")
+  })
+
+  test("reads the step-finish token counts from the real event shape", () => {
+    // Captured from a live `opencode run --format json` stream: the part sits at
+    // the root of the event, NOT under `properties`. `properties.part` is only a
+    // tolerated fallback, so both shapes must be detected.
+    const rootShape = {
+      type: "step_finish",
+      sessionID: "ses_x",
+      part: { type: "step-finish", reason: "length", tokens: { output: 0, reasoning: 32000 } },
+    }
+    const nestedShape = {
+      type: "step_finish",
+      properties: { part: { type: "step-finish", reason: "length", tokens: { output: 0 } } },
+    }
+
+    for (const ev of [rootShape, nestedShape]) {
+      const diag = diagnoseMissingResult({ stdout: "", events: [ev], code: 0, killed: false })
+      expect(diag.reason).toContain("output budget")
+    }
   })
 
   test("flags the reasoning-budget exhaustion seen on the Oliver Bernard run", () => {
