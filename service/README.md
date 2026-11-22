@@ -21,6 +21,9 @@ cron (GMAIL_CRON) → opencode run --command daemon-gmail
                   → Telegram: per-proposal [Approve]/[Ignore]
                   → interview with a time → [Add to calendar]
                   → queue → opencode run --command daemon-calendar
+
+[free-text message] → queue → opencode run --command daemon-support <text>
+                    → answer or on-demand report sent back to Telegram
 ```
 
 The service never reimplements the repo's logic. It shells out to
@@ -28,6 +31,13 @@ The service never reimplements the repo's logic. It shells out to
 `opencode.json` exactly as the interactive flow does. The `daemon-*` commands in
 `.opencode/commands/` are non-interactive variants that end with a JSON result
 block the daemon parses.
+
+**The bot is not cron-only.** Any message you send that is not a `/command`
+becomes a support turn: it is queued (same single queue as the cycles, so it
+never runs in parallel with a scrape) and answered by `daemon-support`, which is
+read-only by contract - it answers questions and builds reports, it does not
+draft applications, submit anything or write to Gmail. Disable it with
+`ENABLE_SUPPORT=false`.
 
 **The daemon never submits an application.** On Apply it drafts, compiles and
 sends you the PDFs; you submit through the portal. This matches the repo rule
@@ -84,6 +94,7 @@ All knobs are environment variables (see `.env.example`):
 | `ENABLE_APPLY` | `true` | draft on an Apply tap |
 | `ENABLE_GMAIL` | `true` | run the Gmail watch cycle |
 | `ENABLE_CALENDAR` | `true` | offer calendar events |
+| `ENABLE_SUPPORT` | `true` | answer free-text messages (questions and reports) |
 | `DASHBOARD_URL` | — | public URL of the HTML dashboard |
 | `OPENCODE_MODEL` | (default) | model override |
 | `OPENCODE_TIMEOUT_MS` | `1800000` | per-run timeout |

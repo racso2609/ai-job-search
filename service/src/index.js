@@ -8,6 +8,7 @@ import {
   runGmailCycle,
   handleApplyTap,
   handleCalendarTap,
+  handleSupportMessage,
 } from "./pipeline.js"
 
 const once = process.argv.includes("--once")
@@ -41,6 +42,12 @@ async function main() {
     onApply: (jobKey, meta) => enqueueCycle(`apply ${jobKey}`, () => handleApplyTap(jobKey, meta)),
     onCalendarApprove: (prop) => enqueueCycle(`calendar ${prop.company}`, () => handleCalendarTap(prop)),
     onGmailApprove: null, // Gmail approval writes are done by the user via /outcome, not here
+    // Free-text messages: the daemon answers questions and builds reports on
+    // demand. Same single queue, so a support turn never runs in parallel with
+    // a scrape cycle.
+    onSupport: config.enableSupport
+      ? (text) => enqueueCycle("support", () => handleSupportMessage(text))
+      : null,
   })
 
   startBot()
