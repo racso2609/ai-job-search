@@ -17,7 +17,7 @@ import {
   sendApplication,
   sendMessage,
 } from "./telegram.js"
-import { runApply, runGmailScan, runCalendar } from "./worker.js"
+import { runApply, runGmailScan, runCalendar, runSupport } from "./worker.js"
 
 function shortId(s) {
   return createHash("sha1").update(s).digest("hex").slice(0, 12)
@@ -159,4 +159,28 @@ export async function handleCalendarTap(prop) {
   await sendMessage(
     `Added to calendar: ${result.summary ?? ""}\n${result.html_link ?? ""}`,
   )
+}
+
+// Free-text message from Oscar. Anything that is not a command is a support
+// question: it goes through `daemon-support`, which answers or builds a report
+// on demand. Read-only by contract (see .opencode/commands/daemon-support.md).
+export async function handleSupportMessage(text) {
+  const question = String(text ?? "").trim()
+  if (!question) return
+
+  const result = await runSupport(question)
+  if (!result) {
+    await sendMessage(
+      "No pude completar la consulta (el run no devolvio resultado). Mira el log del servicio.",
+    )
+    return
+  }
+  if (result.ok === false) {
+    await sendMessage(
+      `No pude responder: ${result.error ?? "error desconocido"}`,
+    )
+    return
+  }
+  const answer = String(result.answer ?? "").trim()
+  await sendMessage(answer || "Sin respuesta.")
 }

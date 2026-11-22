@@ -62,11 +62,31 @@ export function startBot() {
 
   bot.catch((err) => log.error("telegram bot error:", err?.message ?? err))
 
+  // Free-text messages are support questions: the daemon answers them on
+  // demand (reports, balances of the search, "how many did I skip"). Anything
+  // that looks like a command is left alone so a future /command can claim it.
+  bot.on("message:text", (ctx) => handleSupportText(ctx))
+
   bot
     .start({ onStart: () => log.info("telegram bot connected") })
     .catch((e) => log.error("telegram bot failed to start:", e?.message ?? e))
 
   return bot
+}
+
+// Exported so the routing rules (command vs question, no handler = no-op) are
+// testable without a live grammy bot.
+export async function handleSupportText(ctx) {
+  const text = ctx?.message?.text ?? ""
+  if (text.startsWith("/")) return
+  if (!handlers.onSupport) return
+  try {
+    await ctx.replyWithChatAction?.("typing")?.catch?.(() => {})
+    await handlers.onSupport(text)
+  } catch (e) {
+    log.error("support message failed:", e?.stack ?? e)
+    await ctx.reply?.("Error procesando el mensaje - mira el log.")?.catch?.(() => {})
+  }
 }
 
 async function routeCallback(ctx, action, id) {

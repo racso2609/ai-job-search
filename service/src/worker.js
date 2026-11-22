@@ -71,3 +71,11 @@ export async function runCalendar(event) {
   ])
   return json
 }
+
+// Runs one support turn: a free-text question or an on-demand report about the
+// job search. Returns { ok, answer, kind, evidence } or null when the run
+// produced no parseable JSON block.
+export async function runSupport(question) {
+  const { json } = await runCommandJson("daemon-support", [question])
+  return json
+}

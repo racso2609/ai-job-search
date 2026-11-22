@@ -50,6 +50,10 @@ export const config = {
   enableGmail: opt("ENABLE_GMAIL", "true") === "true",
   // When true, an approved interview proposal offers a calendar event.
   enableCalendar: opt("ENABLE_CALENDAR", "true") === "true",
+  // When true, a free-text Telegram message is answered on demand by the
+  // support agent (questions and reports). Turn it off to keep the bot
+  // tap-only.
+  enableSupport: opt("ENABLE_SUPPORT", "true") === "true",
 
   // opencode CLI settings.
   opencode: {
