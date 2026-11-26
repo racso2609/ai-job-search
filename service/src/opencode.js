@@ -11,7 +11,7 @@ import { log } from "./logger.js"
 // --file), used to pass an image to a multimodal model.
 export function runOpencode(command, args = [], { timeoutMs, model, files } = {}) {
   return new Promise((resolve) => {
-    const argv = ["run", "--command", command]
+    const argv = ["run", "--command", command, "--auto"]
     if (args.length) argv.push("--", ...args)
     argv.push("--format", "json")
     const useModel = model ?? config.opencode.model

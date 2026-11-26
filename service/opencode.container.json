@@ -9,14 +9,110 @@
         "apiKey": "{env:VISION_API_KEY}"
       },
       "models": {
-        "glm-5.3-flash": { "name": "GLM 5.3 Flash", "limit": { "context": 128000, "output": 4096 } },
-        "qwen-3-8-27b": { "name": "Qwen3 8 27B", "limit": { "context": 128000, "output": 4096 } },
-        "deepseek-v4.1-flash": { "name": "DeepSeek v4.1 Flash", "limit": { "context": 1048576, "output": 131072 } },
-        "deepseek-v4-pro": { "name": "DeepSeek v4 Pro", "limit": { "context": 1000000, "output": 131072 } },
-        "glm-5.3": { "name": "GLM 5.3", "limit": { "context": 1000000, "output": 131072 } },
-        "gemini-3.7-flash": { "name": "Gemini 3.7 Flash", "limit": { "context": 1048576, "output": 65536 } },
-        "gpt-5.6-terra": { "name": "GPT-5.6 Terra", "limit": { "context": 1050000, "output": 128000 } }
+        "glm-5.3-flash": {
+          "name": "GLM 5.3 Flash",
+          "limit": {
+            "context": 128000,
+            "output": 4096
+          }
+        },
+        "qwen-3-8-27b": {
+          "name": "Qwen3 8 27B",
+          "limit": {
+            "context": 128000,
+            "output": 4096
+          }
+        },
+        "deepseek-v4.1-flash": {
+          "name": "DeepSeek v4.1 Flash",
+          "limit": {
+            "context": 1048576,
+            "output": 131072
+          }
+        },
+        "deepseek-v4-pro": {
+          "name": "DeepSeek v4 Pro",
+          "limit": {
+            "context": 1000000,
+            "output": 131072
+          }
+        },
+        "glm-5.3": {
+          "name": "GLM 5.3",
+          "limit": {
+            "context": 1000000,
+            "output": 131072
+          }
+        },
+        "gemini-3.7-flash": {
+          "name": "Gemini 3.7 Flash",
+          "limit": {
+            "context": 1048576,
+            "output": 65536
+          }
+        },
+        "gpt-5.6-terra": {
+          "name": "GPT-5.6 Terra",
+          "limit": {
+            "context": 1050000,
+            "output": 128000
+          }
+        }
       }
+    }
+  },
+  "permission": {
+    "edit": "allow",
+    "webfetch": "allow",
+    "websearch": "allow",
+    "bash": {
+      "*": "ask",
+      "bun run .agents/skills/jobbank-search/cli/src/cli.ts*": "allow",
+      "bun run .agents/skills/jobdanmark-search/cli/src/cli.ts*": "allow",
+      "bun run .agents/skills/jobindex-search/cli/src/cli.ts*": "allow",
+      "bun run .agents/skills/jobnet-search/cli/src/cli.ts*": "allow",
+      "bun run .agents/skills/linkedin-search/cli/src/cli.ts*": "allow",
+      "bun run .agents/skills/freehire-search/cli/src/cli.ts*": "allow",
+      "bun --version*": "allow",
+      "python salary_lookup.py*": "allow",
+      "python3 salary_lookup.py*": "allow",
+      "python tools/rank_state.py*": "allow",
+      "python3 tools/rank_state.py*": "allow",
+      "python tools/job_key.py*": "allow",
+      "python3 tools/job_key.py*": "allow",
+      "python tools/scrape_state.py*": "allow",
+      "python3 tools/scrape_state.py*": "allow",
+      "python tools/verify_pdf.py*": "allow",
+      "python3 tools/verify_pdf.py*": "allow",
+      "python tools/verify_layout.py*": "allow",
+      "python3 tools/verify_layout.py*": "allow",
+      "python tools/robots_check.py*": "allow",
+      "python3 tools/robots_check.py*": "allow",
+      "python tools/fetch_page.py*": "allow",
+      "python3 tools/fetch_page.py*": "allow",
+      "python tools/posting_guard.py*": "allow",
+      "python3 tools/posting_guard.py*": "allow",
+      "python3 tools/install_portal_clis.py*": "allow",
+      "python tools/install_portal_clis.py*": "allow",
+      "lualatex*": "allow",
+      "xelatex*": "allow",
+      "pdftotext*": "allow",
+      "curl -d*": "deny",
+      "curl --data*": "deny",
+      "curl -F*": "deny",
+      "curl --form*": "deny",
+      "curl -T*": "deny",
+      "curl --upload-file*": "deny",
+      "curl -X POST*": "deny",
+      "curl -X PUT*": "deny",
+      "wget --post-data*": "deny",
+      "wget --post-file*": "deny",
+      "scp*": "deny",
+      "sftp*": "deny",
+      "ssh*": "deny",
+      "nc*": "deny",
+      "ncat*": "deny",
+      "netcat*": "deny"
     }
   }
 }
