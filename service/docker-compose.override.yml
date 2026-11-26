@@ -1,0 +1,23 @@
+# Override para correr el bot EN CONTENEDOR sobre este host.
+#
+# Por qué network_mode: host:
+#   ufw del host tiene DEFAULT_INPUT_POLICY=DROP, así que los procesos del host
+#   ligados a 0.0.0.0 (p.ej. el proxy de visión/opencode en 127.0.0.1:18899) NO
+#   son alcanzables desde contenedores por la red docker. Con host networking el
+#   contenedor comparte la pila del host y 127.0.0.1:18899 funciona directo.
+#
+# Config de opencode: el opencode.json del repo no trae el provider
+#   `cheaperinference`; se monta service/opencode.container.json (key por env
+#   VISION_API_KEY, sin secreto en el fichero) como config global de opencode.
+#
+# Uso:
+#   docker compose -f service/docker-compose.yml -f service/docker-compose.override.yml up -d --build
+services:
+  job-search:
+    network_mode: host
+    environment:
+      OPENCODE_BIN: /usr/local/bin/opencode
+      VISION_BASE_URL: http://127.0.0.1:18899/v1
+      OPENCODE_MODEL: cheaperinference/deepseek-v4.1-flash
+    volumes:
+      - ./opencode.container.json:/root/.config/opencode/opencode.json:ro

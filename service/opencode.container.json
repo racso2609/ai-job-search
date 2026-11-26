@@ -1,0 +1,22 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "cheaperinference": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "CheaperInference",
+      "options": {
+        "baseURL": "http://127.0.0.1:18899/v1",
+        "apiKey": "{env:VISION_API_KEY}"
+      },
+      "models": {
+        "glm-5.3-flash": { "name": "GLM 5.3 Flash", "limit": { "context": 128000, "output": 4096 } },
+        "qwen-3-8-27b": { "name": "Qwen3 8 27B", "limit": { "context": 128000, "output": 4096 } },
+        "deepseek-v4.1-flash": { "name": "DeepSeek v4.1 Flash", "limit": { "context": 1048576, "output": 131072 } },
+        "deepseek-v4-pro": { "name": "DeepSeek v4 Pro", "limit": { "context": 1000000, "output": 131072 } },
+        "glm-5.3": { "name": "GLM 5.3", "limit": { "context": 1000000, "output": 131072 } },
+        "gemini-3.7-flash": { "name": "Gemini 3.7 Flash", "limit": { "context": 1048576, "output": 65536 } },
+        "gpt-5.6-terra": { "name": "GPT-5.6 Terra", "limit": { "context": 1050000, "output": 128000 } }
+      }
+    }
+  }
+}
