@@ -9,6 +9,10 @@ import {
   handleApplyTap,
   handleCalendarTap,
   handleSupportMessage,
+  handleVisionMessage,
+  handleCvRequest,
+  handleCvDraftApprove,
+  handleCvBuildApprove,
 } from "./pipeline.js"
 
 const once = process.argv.includes("--once")
@@ -48,6 +52,16 @@ async function main() {
     onSupport: config.enableSupport
       ? (text) => enqueueCycle("support", () => handleSupportMessage(text))
       : null,
+    // A photo/document was sent: read it with the vision step (same queue).
+    onVision: config.vision.baseUrl && config.vision.model
+      ? (payload) => enqueueCycle("vision", () => handleVisionMessage(payload))
+      : null,
+    // A free-text request to generate a CV: draft it (same queue).
+    onCvRequest: (text) => enqueueCycle("cv-request", () => handleCvRequest(text)),
+    // "Generar CV" button on a read posting: draft from the stored posting.
+    onCvDraft: (req) => enqueueCycle("cv-draft", () => handleCvDraftApprove(req)),
+    // "Generar PDF" button: compile the approved draft.
+    onCvBuild: (req) => enqueueCycle("cv-build", () => handleCvBuildApprove(req)),
   })
 
   startBot()

@@ -21,6 +21,13 @@ by reading `job_search_tracker.csv`; a question about "what did I skip" is
 answered by `service/state/decisions.jsonl`; a report is answered by
 `/html-report` or by `tools/rank_state.py`.
 
+**Questions about CVs you already have.** When Oscar asks "¿qué CVs tengo?",
+"¿cuál usé para X?", "¿tengo uno para backend?", answer by listing and reading
+the CVs on disk: `cv/main_*.tex` / `cv/main_*.pdf` (tailored CVs) and
+`documents/cv/` (the master CVs and `career-source-of-truth.yaml`). You may read
+these freely to answer. To **generate** a new CV, tell him to say "genera un CV
+para <oferta>" (that routes to the CV generator) — you do not draft here.
+
 ## Hard rules (they do not relax in daemon mode)
 
 1. **Read-only by default.** This command answers questions and produces

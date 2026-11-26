@@ -63,6 +63,17 @@ export const config = {
     timeoutMs: Number.parseInt(opt("OPENCODE_TIMEOUT_MS", "1800000"), 10), // 30 min
   },
 
+  // Vision/OCR for images sent to the bot. opencode's --file does not pass an
+  // image to the model as a vision part, so we call an OpenAI-compatible
+  // endpoint directly with the image as a base64 data URL. Empty baseUrl
+  // disables photo reading (the bot stays text-only).
+  vision: {
+    baseUrl: opt("VISION_BASE_URL", ""), // e.g. http://127.0.0.1:18899/v1
+    apiKey: opt("VISION_API_KEY", ""),
+    model: opt("VISION_MODEL", ""), // must be multimodal, e.g. gemini-3.7-flash
+    timeoutMs: Number.parseInt(opt("VISION_TIMEOUT_MS", "120000"), 10),
+  },
+
   paths: {
     repo: REPO_ROOT,
     seenJobs: join(REPO_ROOT, "job_scraper", "seen_jobs.json"),

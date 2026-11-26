@@ -5,12 +5,20 @@ import { log } from "./logger.js"
 // Runs `opencode run --command <cmd> [args] --format json` inside the repo and
 // returns { code, stdout, stderr, events }. The daemon drives the repo's own
 // commands headlessly; opencode loads the workspace skills/agents/config.
-export function runOpencode(command, args = [], { timeoutMs } = {}) {
+//
+// opts.model overrides the configured model for this run (e.g. a vision model
+// for image reading). opts.files attaches files to the message (opencode's
+// --file), used to pass an image to a multimodal model.
+export function runOpencode(command, args = [], { timeoutMs, model, files } = {}) {
   return new Promise((resolve) => {
     const argv = ["run", "--command", command]
     if (args.length) argv.push("--", ...args)
     argv.push("--format", "json")
-    if (config.opencode.model) argv.push("--model", config.opencode.model)
+    const useModel = model ?? config.opencode.model
+    if (useModel) argv.push("--model", useModel)
+    if (files && files.length) {
+      for (const f of files) argv.push("--file", f)
+    }
 
     const timeout = timeoutMs ?? config.opencode.timeoutMs
     log.info(`running: ${config.opencode.bin} ${argv.join(" ")}`)
