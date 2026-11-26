@@ -22,6 +22,7 @@ import {
   sendVisionResult,
   sendCvDraft,
   sendCvPdf,
+  downloadTelegramFile,
 } from "./telegram.js"
 import {
   runApply,
