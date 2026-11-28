@@ -167,3 +167,9 @@ None.
 [PENDIENTE] — no reference letters exist in `documents/references/` yet.
 
 More references available upon request.
+
+## Confirmed Profile Updates
+
+- **2026-11-28:** Aurantis work also includes web development.
+- **2026-11-28:** Moneva work also included React Native development.
+- **2026-11-28:** The remaining professional engagements provide full-stack experience.

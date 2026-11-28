@@ -1,0 +1,30 @@
+# Override para correr el bot EN CONTENEDOR sobre este host.
+#
+# Por qué network_mode: host:
+#   ufw del host tiene DEFAULT_INPUT_POLICY=DROP, así que los procesos del host
+#   ligados a 127.0.0.1 (p.ej. el proxy de visión/opencode en 127.0.0.1:18899)
+#   NO son alcanzables desde contenedores por la red docker. Con host networking
+#   el contenedor comparte la pila del host y 127.0.0.1:18899 funciona directo.
+#
+# Config de opencode: el `opencode.json` de la raíz del repo tiene rutas del
+#   HOST hardcodeadas (/home/racsolab/.npm-global/...). Como el repo se monta en
+#   /workspace, opencode lee ESE config (el del proyecto gana sobre el global) y
+#   los MCP fallan con ENOENT dentro del contenedor. Por eso montamos
+#   service/opencode.container.json —misma config con rutas de la imagen— SOBRE
+#   /workspace/opencode.json. Se monta también como config global por si el
+#   proyecto cambia de cwd.
+#
+# Uso:
+#   docker compose -f service/docker-compose.yml -f service/docker-compose.override.yml up -d --build
+services:
+  job-search:
+    network_mode: host
+    environment:
+      OPENCODE_BIN: /home/app/.local/bin/opencode
+      VISION_BASE_URL: http://127.0.0.1:18899/v1
+      OPENCODE_MODEL: cheaperinference/deepseek-v4.1-flash
+    volumes:
+      # El config del proyecto gana: montarlo sobre /workspace/opencode.json.
+      - ./opencode.container.json:/workspace/opencode.json:ro
+      # Y como config global, por si opencode arranca con otro cwd.
+      - ./opencode.container.json:/home/app/.config/opencode/opencode.json:ro

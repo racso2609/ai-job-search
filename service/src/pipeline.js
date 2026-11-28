@@ -1,4 +1,7 @@
 import { createHash } from "node:crypto"
+import { mkdtempSync, rmSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
 import { config } from "./config.js"
 import { log } from "./logger.js"
 import { runOpencode } from "./opencode.js"
@@ -16,8 +19,20 @@ import {
   sendCalendarProposal,
   sendApplication,
   sendMessage,
+  sendVisionResult,
+  sendCvDraft,
+  sendCvPdf,
+  downloadTelegramFile,
 } from "./telegram.js"
-import { runApply, runGmailScan, runCalendar, runSupport } from "./worker.js"
+import {
+  runApply,
+  runGmailScan,
+  runCalendar,
+  runSupport,
+  runVision,
+  runCvDraft,
+  runCvBuild,
+} from "./worker.js"
 
 function shortId(s) {
   return createHash("sha1").update(s).digest("hex").slice(0, 12)
@@ -183,4 +198,58 @@ export async function handleSupportMessage(text) {
   }
   const answer = String(result.answer ?? "").trim()
   await sendMessage(answer || "Sin respuesta.")
+}
+
+// A photo or document was sent. Download it, read it with the vision step, and
+// relay the result. If it is a job posting, offer to generate a CV.
+export async function handleVisionMessage({ fileId, caption }) {
+  let dir
+  try {
+    dir = mkdtempSync(join(tmpdir(), "ajs-img-"))
+    const imgPath = join(dir, "image")
+    await downloadTelegramFile(fileId, imgPath)
+    const result = await runVision(imgPath, caption ?? "")
+    if (!result) {
+      await sendMessage("No pude leer la imagen (visión no configurada o sin resultado).")
+      return
+    }
+    await sendVisionResult(result, { postingText: result.text })
+  } catch (e) {
+    log.error("vision message failed:", e?.stack ?? e)
+    await sendMessage(`Error leyendo la imagen: ${e?.message ?? e}`)
+  } finally {
+    if (dir) {
+      try {
+        rmSync(dir, { recursive: true, force: true })
+      } catch {
+        /* best effort */
+      }
+    }
+  }
+}
+
+// Oscar asked in free text to generate a CV. The text is usually a posting URL
+// or pasted posting. Draft it and show the preview + approve button.
+export async function handleCvRequest(text) {
+  const posting = String(text ?? "").trim()
+  if (!posting) return
+  const result = await runCvDraft({ posting })
+  await sendCvDraft(result)
+}
+
+// Oscar tapped "Generar CV" on a posting read from a photo/text: draft it from
+// the stored posting and show the preview + approve button.
+export async function handleCvDraftApprove(req) {
+  const result = await runCvDraft({
+    posting: req.posting,
+    company: req.company,
+    role: req.role,
+  })
+  await sendCvDraft(result)
+}
+
+// Oscar approved the preview: build the PDF.
+export async function handleCvBuildApprove(req) {
+  const result = await runCvBuild({ cv_tex: req.cv_tex })
+  await sendCvPdf(result)
 }

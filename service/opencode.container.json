@@ -1,0 +1,95 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    "AGENTS.md"
+  ],
+  "mcp": {
+    "gmail": {
+      "type": "local",
+      "command": [
+        "bun",
+        "x",
+        "@gongrzhe/server-gmail-autoauth-mcp"
+      ],
+      "enabled": false,
+      "environment": {
+        "GMAIL_OAUTH_PATH": "{env:GMAIL_OAUTH_PATH}",
+        "GMAIL_CREDENTIALS_PATH": "{env:GMAIL_CREDENTIALS_PATH}"
+      }
+    },
+    "calendar": {
+      "type": "local",
+      "command": [
+        "/home/app/.local/bin/google-calendar-mcp"
+      ],
+      "enabled": true,
+      "environment": {
+        "GOOGLE_OAUTH_CREDENTIALS": "/workspace/service/secrets/gcp-oauth.keys.json"
+      }
+    },
+    "gmail-imap": {
+      "type": "local",
+      "command": [
+        "/home/app/.local/bin/imap-mcp"
+      ],
+      "enabled": true,
+      "environment": {
+        "IMAP_MCP_READ_ONLY": "true"
+      }
+    }
+  },
+  "permission": {
+    "edit": "allow",
+    "webfetch": "allow",
+    "websearch": "allow",
+    "bash": {
+      "*": "ask",
+      "bun run .agents/skills/jobbank-search/cli/src/cli.ts*": "allow",
+      "bun run .agents/skills/jobdanmark-search/cli/src/cli.ts*": "allow",
+      "bun run .agents/skills/jobindex-search/cli/src/cli.ts*": "allow",
+      "bun run .agents/skills/jobnet-search/cli/src/cli.ts*": "allow",
+      "bun run .agents/skills/linkedin-search/cli/src/cli.ts*": "allow",
+      "bun run .agents/skills/freehire-search/cli/src/cli.ts*": "allow",
+      "bun --version*": "allow",
+      "python salary_lookup.py*": "allow",
+      "python3 salary_lookup.py*": "allow",
+      "python tools/rank_state.py*": "allow",
+      "python3 tools/rank_state.py*": "allow",
+      "python tools/job_key.py*": "allow",
+      "python3 tools/job_key.py*": "allow",
+      "python tools/scrape_state.py*": "allow",
+      "python3 tools/scrape_state.py*": "allow",
+      "python tools/verify_pdf.py*": "allow",
+      "python3 tools/verify_pdf.py*": "allow",
+      "python tools/verify_layout.py*": "allow",
+      "python3 tools/verify_layout.py*": "allow",
+      "python tools/robots_check.py*": "allow",
+      "python3 tools/robots_check.py*": "allow",
+      "python tools/fetch_page.py*": "allow",
+      "python3 tools/fetch_page.py*": "allow",
+      "python tools/posting_guard.py*": "allow",
+      "python3 tools/posting_guard.py*": "allow",
+      "python3 tools/install_portal_clis.py*": "allow",
+      "python tools/install_portal_clis.py*": "allow",
+      "lualatex*": "allow",
+      "xelatex*": "allow",
+      "pdftotext*": "allow",
+      "curl -d*": "deny",
+      "curl --data*": "deny",
+      "curl -F*": "deny",
+      "curl --form*": "deny",
+      "curl -T*": "deny",
+      "curl --upload-file*": "deny",
+      "curl -X POST*": "deny",
+      "curl -X PUT*": "deny",
+      "wget --post-data*": "deny",
+      "wget --post-file*": "deny",
+      "scp*": "deny",
+      "sftp*": "deny",
+      "ssh*": "deny",
+      "nc*": "deny",
+      "ncat*": "deny",
+      "netcat*": "deny"
+    }
+  }
+}
