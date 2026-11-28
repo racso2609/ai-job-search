@@ -1,0 +1,47 @@
+# Build context is the REPO ROOT (see service/docker-compose.yml: context: ..).
+# Docker only honours the .dockerignore at the root of the context, so this file
+# lives here and not in service/ — the old service/.dockerignore was never read.
+
+# Dependencies are reinstalled inside the image (bun install), and the portal
+# CLIs are installed by tools/install_portal_clis.py. 198 MB of host
+# node_modules must not be copied.
+**/node_modules
+**/.pnpm-store
+**/bun.lockb
+
+# Git history is not needed at runtime; it also breaks layer caching.
+**/.git
+
+# LaTeX build byproducts.
+**/*.aux
+**/*.log
+**/*.out
+**/*.fls
+**/*.fdb_latexmk
+**/*.synctex.gz
+**/*.toc
+**/*.bbl
+**/*.blg
+
+# Generated PDFs are rebuilt by /apply; keep the image small.
+**/*.pdf
+
+# Secrets and per-install state never belong in an image.
+service/.env
+service/.env.bak-*
+service/secrets
+service/state
+**/*.key
+**/*.pem
+**/id_rsa*
+
+# Local agent scratch and caches.
+.agent
+.agents/**/.cache
+**/__pycache__
+**/*.pyc
+**/.DS_Store
+
+# Backups of config we keep in the tree.
+**/*.bak-*
+**/*.bak2
