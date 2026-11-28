@@ -58,23 +58,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # fontawesome5 + academicons live in the 1.7 GB texlive-fonts-extra package.
-# Pull only those two trees out of the .deb instead of installing the package.
-RUN set -eux; \
-    cd /tmp; \
-    apt-get update; \
-    apt-get download texlive-fonts-extra; \
-    dpkg-deb -x texlive-fonts-extra_*.deb /tmp/tle; \
-    cp -a /tmp/tle/usr/share/texlive/texmf-dist/tex/latex/fontawesome5 \
-          /tmp/tle/usr/share/texlive/texmf-dist/tex/latex/academicons \
-          /usr/share/texlive/texmf-dist/tex/latex/; \
-    mkdir -p /usr/share/texlive/texmf-dist/fonts/opentype/public; \
-    cp -a /tmp/tle/usr/share/texlive/texmf-dist/fonts/opentype/public/fontawesome5 \
-          /usr/share/texlive/texmf-dist/fonts/opentype/public/; \
-    rm -rf /tmp/tle /tmp/texlive-fonts-extra_*.deb /var/lib/apt/lists/*; \
-    texhash || mktexlsr; \
-    # fail the build if either package is not resolvable afterwards
-    kpsewhich fontawesome5.sty; \
-    kpsewhich academicons.sty
+# Pull only those two packages out of the .deb instead of installing the whole
+# thing (see service/install-tex-extra.sh for the why and the per-tree detail).
+COPY service/install-tex-extra.sh /tmp/install-tex-extra.sh
+RUN sh /tmp/install-tex-extra.sh && rm -f /tmp/install-tex-extra.sh
 
 # pypdf is the fallback when pdftotext is absent (verify_pdf.py).
 RUN pip install --no-cache-dir pypdf
@@ -164,13 +151,16 @@ RUN cd /workspace/service && bun install --frozen-lockfile \
 # 6. Runtime
 # ---------------------------------------------------------------------------
 # Fail fast if a required binary is missing, instead of discovering it at the
-# first Telegram tap.
+# first Telegram tap. kpsewhich returns 0 even when some of its arguments are
+# missing, so each TeX path is checked on its own line.
 RUN set -eux; \
     for b in bun node npm python3 opencode lualatex xelatex pdflatex pdftotext pdfinfo git google-calendar-mcp imap-mcp; do \
       command -v "$b" >/dev/null || { echo "MISSING: $b" >&2; exit 1; }; \
     done; \
     python3 -c "import pypdf"; \
-    kpsewhich moderncv.cls fontspec.sty fontawesome5.sty academicons.sty >/dev/null
+    for f in moderncv.cls fontspec.sty fontawesome5.sty academicons.sty academicons.ttf FontAwesome5Free-Solid-900.otf; do \
+      kpsewhich "$f" | grep -q . || { echo "MISSING TeX file: $f" >&2; exit 1; }; \
+    done
 
 WORKDIR /workspace
 CMD ["bun", "run", "service/src/index.js"]
